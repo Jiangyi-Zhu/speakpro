@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { ExpressionStepClient } from "./client";
 
 export default async function ExpressionStepPage({
@@ -19,6 +20,25 @@ export default async function ExpressionStepPage({
     // DB not connected
   }
 
+  let initialSubmissions: Record<string, string> = {};
+  try {
+    const session = await auth();
+    if (session?.user?.id) {
+      const expressions = await prisma.expression.findMany({
+        where: { userId: session.user.id, lessonId: id, questionId: { not: null } },
+        select: { questionId: true, audioUrl: true },
+        orderBy: { createdAt: "desc" },
+      });
+      for (const e of expressions) {
+        if (e.questionId && e.audioUrl && !initialSubmissions[e.questionId]) {
+          initialSubmissions[e.questionId] = e.audioUrl;
+        }
+      }
+    }
+  } catch {
+    // not logged in
+  }
+
   return (
     <ExpressionStepClient
       lessonId={id}
@@ -28,6 +48,7 @@ export default async function ExpressionStepPage({
         hint: q.hint || "",
         sampleAnswer: q.sampleAnswer || "",
       }))}
+      initialSubmissions={initialSubmissions}
     />
   );
 }
