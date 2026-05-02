@@ -30,13 +30,20 @@ export function StepNav({ lessonId, completedSteps = {} }: StepNavProps) {
     pathname?.includes(`/${s.key}`)
   );
 
+  const derived = { ...completedSteps };
+  for (let i = LEARNING_STEPS.length - 2; i >= 0; i--) {
+    if (derived[LEARNING_STEPS[i + 1].key] && !derived[LEARNING_STEPS[i].key]) {
+      derived[LEARNING_STEPS[i].key] = true;
+    }
+  }
+
   return (
     <nav className="flex items-center py-2">
       {LEARNING_STEPS.map((step, i) => {
         const href = `/lessons/${lessonId}/${step.key}`;
         const isActive = i === currentStepIndex;
-        const isCompleted = !!completedSteps[step.key];
-        const prevCompleted = i > 0 && !!completedSteps[LEARNING_STEPS[i - 1].key];
+        const isCompleted = !!derived[step.key];
+        const prevCompleted = i > 0 && !!derived[LEARNING_STEPS[i - 1].key];
 
         return (
           <Fragment key={step.key}>
