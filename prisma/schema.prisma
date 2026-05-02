@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          String    @default("USER")
+
+  streakDays    Int       @default(0)
+  lastStudyDate DateTime?
+  totalMinutes  Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts         Account[]
+  sessions         Session[]
+  progress         UserProgress[]
+  vocabularyItems  VocabularyItem[]
+  recordings       Recording[]
+  expressions      Expression[]
+  savedSentences   SavedSentence[]
+  userAchievements UserAchievement[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Lesson {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  coverImage  String?
+  videoUrl    String?
+  duration    Int?
+  difficulty  String  @default("INTERMEDIATE")
+  category    String?
+  tags        String  @default("[]")
+  published   Boolean @default(false)
+  sortOrder   Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  segments        LessonSegment[]
+  progress        UserProgress[]
+  questions       ExpressionQuestion[]
+  vocabularyItems VocabularyItem[]
+  recordings      Recording[]
+  expressions     Expression[]
+  savedSentences  SavedSentence[]
+}
+
+model LessonSegment {
+  id          String  @id @default(cuid())
+  lessonId    String
+  index       Int
+  textEn      String
+  textZh      String?
+  grammarNote String?
+  startTime   Float?
+  endTime     Float?
+  audioUrl    String?
+
+  lesson         Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  recordings     Recording[]
+  savedSentences SavedSentence[]
+
+  @@unique([lessonId, index])
+}
+
+model UserProgress {
+  id       String  @id @default(cuid())
+  userId   String
+  lessonId String
+  step     Int     @default(1)
+  completed Boolean @default(false)
+
+  videoWatched       Boolean @default(false)
+  vocabCompleted     Boolean @default(false)
+  sentencesCompleted Boolean @default(false)
+  expressionDone     Boolean @default(false)
+  summaryGenerated   Boolean @default(false)
+
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  updatedAt   DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model VocabularyItem {
+  id         String  @id @default(cuid())
+  userId     String
+  lessonId   String?
+  word       String
+  definition String?
+  phonetic   String?
+  example    String?
+  mastered   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, word])
+}
+
+model Recording {
+  id        String @id @default(cuid())
+  userId    String
+  lessonId  String
+  segmentId String?
+  audioUrl  String
+  duration  Float?
+
+  createdAt DateTime @default(now())
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson  Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  segment LessonSegment?  @relation(fields: [segmentId], references: [id], onDelete: SetNull)
+}
+
+model ExpressionQuestion {
+  id        String @id @default(cuid())
+  lessonId  String
+  question  String
+  hint      String?
+  sortOrder Int    @default(0)
+
+  lesson      Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  expressions Expression[]
+}
+
+model Expression {
+  id         String  @id @default(cuid())
+  userId     String
+  lessonId   String
+  questionId String?
+  type       String
+  content    String?
+  audioUrl   String?
+
+  createdAt DateTime @default(now())
+
+  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson   Lesson              @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  question ExpressionQuestion? @relation(fields: [questionId], references: [id], onDelete: SetNull)
+}
+
+model SavedSentence {
+  id        String  @id @default(cuid())
+  userId    String
+  lessonId  String
+  segmentId String
+  note      String?
+
+  createdAt DateTime @default(now())
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson  Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  segment LessonSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, segmentId])
+}
+
+model Achievement {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String
+  icon        String
+  condition   String
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+}
