@@ -220,11 +220,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
     else v.pause();
   }
 
-  const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
-
-  function cycleSpeed() {
-    const nextIdx = (SPEEDS.indexOf(playbackRate) + 1) % SPEEDS.length;
-    const rate = SPEEDS[nextIdx];
+  function setSpeed(rate: number) {
     setPlaybackRate(rate);
     if (videoRef.current) videoRef.current.playbackRate = rate;
   }
@@ -289,16 +285,21 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
           </button>
         )}
 
-        <button
-          onClick={cycleSpeed}
-          className={`rounded-lg px-3 py-2 text-sm font-bold tabular-nums transition-colors ${
+        <select
+          value={playbackRate}
+          onChange={(e) => setSpeed(Number(e.target.value))}
+          className={`rounded-lg px-2 py-2 text-sm font-bold tabular-nums transition-colors ${
             playbackRate !== 1
-              ? "bg-brand-50 text-brand-700"
-              : "bg-gray-100 text-gray-500"
-          }`}
+              ? "bg-brand-50 text-brand-700 border-brand-200"
+              : "bg-gray-100 text-gray-500 border-gray-300"
+          } border`}
         >
-          {playbackRate}x
-        </button>
+          {[0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2].map((s) => (
+            <option key={s} value={s}>
+              {s}x
+            </option>
+          ))}
+        </select>
 
         <button
           onClick={cycleLoopMode}

@@ -59,17 +59,19 @@ export default async function DashboardPage() {
   const stepLabels: Record<number, string> = {
     1: "视频学习",
     2: "词汇预习",
-    3: "句子跟读",
-    4: "自由表达",
-    5: "学习总结",
+    3: "学习生词",
+    4: "句子跟读",
+    5: "自由表达",
+    6: "学习总结",
   };
 
   const stepPaths: Record<number, string> = {
     1: "video",
     2: "vocabulary",
-    3: "sentences",
-    4: "expression",
-    5: "summary",
+    3: "word-study",
+    4: "sentences",
+    5: "expression",
+    6: "summary",
   };
 
   return (
@@ -108,7 +110,7 @@ export default async function DashboardPage() {
             <div className="mb-2 h-2.5 overflow-hidden rounded-full bg-gray-100">
               <div
                 className="h-full rounded-full bg-brand-500 transition-all"
-                style={{ width: `${(recentLessons[0].step / 5) * 100}%` }}
+                style={{ width: `${(recentLessons[0].step / 6) * 100}%` }}
               />
             </div>
             <div className="flex items-center justify-between">

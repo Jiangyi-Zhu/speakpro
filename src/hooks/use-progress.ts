@@ -6,6 +6,7 @@ interface ProgressData {
   step: number;
   videoWatched?: boolean;
   vocabCompleted?: boolean;
+  wordStudyCompleted?: boolean;
   sentencesCompleted?: boolean;
   expressionDone?: boolean;
   summaryGenerated?: boolean;

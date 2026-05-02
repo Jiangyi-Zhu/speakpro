@@ -39,6 +39,7 @@ export default async function LessonLayout({
         completedSteps = {
           video: progress.videoWatched,
           vocabulary: progress.vocabCompleted,
+          "word-study": progress.wordStudyCompleted,
           sentences: progress.sentencesCompleted,
           expression: progress.expressionDone,
           summary: progress.summaryGenerated,

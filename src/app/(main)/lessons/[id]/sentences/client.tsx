@@ -348,7 +348,7 @@ export function SentencesStepClient({ lessonId, videoUrl, segments, initialSaved
           {currentIndex === segments.length - 1 ? (
             <Link
               href={`/lessons/${lessonId}/expression`}
-              onClick={() => updateProgress({ step: 3, sentencesCompleted: true })}
+              onClick={() => updateProgress({ step: 4, sentencesCompleted: true })}
               className="flex items-center gap-1 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
             >
               下一步：自由表达
@@ -369,14 +369,14 @@ export function SentencesStepClient({ lessonId, videoUrl, segments, initialSaved
       {/* Page Navigation */}
       <div className="flex items-center justify-between">
         <Link
-          href={`/lessons/${lessonId}/vocabulary`}
+          href={`/lessons/${lessonId}/word-study`}
           className="rounded-xl bg-white px-5 py-2.5 text-sm font-medium text-gray-600 shadow-[0_2px_0_0_#E5E7EB] transition-all hover:bg-gray-50 active:translate-y-0.5 active:shadow-none"
         >
           上一步
         </Link>
         <Link
           href={`/lessons/${lessonId}/expression`}
-          onClick={() => updateProgress({ step: 3, sentencesCompleted: true })}
+          onClick={() => updateProgress({ step: 4, sentencesCompleted: true })}
           className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200"
         >
           跳过跟读

@@ -75,7 +75,7 @@ export default async function LandingPage() {
             练出地道职场英语
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-brand-100 sm:text-xl">
-            科学的五步学习法，从视频观看到口语表达，帮你系统提升职场英语交流能力
+            科学的六步学习法，从视频观看到口语表达，帮你系统提升职场英语交流能力
           </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             {isLoggedIn ? (
@@ -112,7 +112,7 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-5xl">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-bold text-gray-900 sm:text-4xl">
-              五步学习法
+              六步学习法
             </h2>
             <p className="text-lg text-gray-500">
               科学的学习闭环，每一步都在为你的口语能力加分

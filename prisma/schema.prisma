@@ -121,6 +121,7 @@ model UserProgress {
 
   videoWatched       Boolean @default(false)
   vocabCompleted     Boolean @default(false)
+  wordStudyCompleted Boolean @default(false)
   sentencesCompleted Boolean @default(false)
   expressionDone     Boolean @default(false)
   summaryGenerated   Boolean @default(false)
@@ -170,11 +171,12 @@ model Recording {
 }
 
 model ExpressionQuestion {
-  id        String @id @default(cuid())
-  lessonId  String
-  question  String
-  hint      String?
-  sortOrder Int    @default(0)
+  id           String @id @default(cuid())
+  lessonId     String
+  question     String
+  hint         String?
+  sampleAnswer String?
+  sortOrder    Int    @default(0)
 
   lesson      Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   expressions Expression[]

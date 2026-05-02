@@ -11,6 +11,8 @@ import {
   ChevronRight,
   Check,
   Loader2,
+  Eye,
+  ArrowRight,
 } from "lucide-react";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { useProgress } from "@/hooks/use-progress";
@@ -19,6 +21,7 @@ interface Question {
   id: string;
   question: string;
   hint: string;
+  sampleAnswer: string;
 }
 
 interface Props {
@@ -28,22 +31,20 @@ interface Props {
 
 export function ExpressionStepClient({ lessonId, questions }: Props) {
   const [currentQ, setCurrentQ] = useState(0);
-  const [textResponses, setTextResponses] = useState<Record<number, string>>({});
-  const [mode, setMode] = useState<"text" | "audio">("text");
   const [submitted, setSubmitted] = useState<Set<number>>(new Set());
   const [submitting, setSubmitting] = useState(false);
+  const [showAnswer, setShowAnswer] = useState<Set<number>>(new Set());
 
   const recorder = useAudioRecorder();
   const { updateProgress } = useProgress(lessonId);
   const question = questions[currentQ];
-  const textResponse = textResponses[currentQ] || "";
 
   async function handleSubmit() {
     setSubmitting(true);
     try {
       let audioUrl: string | undefined;
 
-      if (mode === "audio" && recorder.audioBlob) {
+      if (recorder.audioBlob) {
         const buffer = await recorder.audioBlob.arrayBuffer();
         const base64 = btoa(
           new Uint8Array(buffer).reduce((s, b) => s + String.fromCharCode(b), "")
@@ -57,8 +58,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
         body: JSON.stringify({
           lessonId,
           questionId: question?.id,
-          type: mode === "text" ? "TEXT" : "AUDIO",
-          content: mode === "text" ? textResponse : undefined,
+          type: "AUDIO",
           audioUrl,
         }),
       });
@@ -66,7 +66,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
       setSubmitted((prev) => {
         const next = new Set([...prev, currentQ]);
         if (next.size >= questions.length) {
-          updateProgress({ step: 4, expressionDone: true });
+          updateProgress({ step: 5, expressionDone: true });
         }
         return next;
       });
@@ -96,6 +96,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
             className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
           >
             下一步：学习总结
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
@@ -124,127 +125,98 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
           </h2>
           {question.hint && (
             <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
-              💡 {question.hint}
+              {question.hint}
             </p>
           )}
         </div>
 
-        {/* Mode Toggle */}
-        <div className="mb-4 flex gap-2">
+        {/* Audio Recording */}
+        <div className="flex flex-col items-center gap-4 py-6">
           <button
-            onClick={() => setMode("text")}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              mode === "text" ? "bg-brand-50 text-brand-700" : "bg-gray-100 text-gray-500"
+            onClick={
+              recorder.isRecording ? recorder.stopRecording : recorder.startRecording
+            }
+            disabled={submitted.has(currentQ)}
+            className={`flex h-20 w-20 items-center justify-center rounded-full transition-all ${
+              recorder.isRecording
+                ? "bg-red-500 text-white shadow-lg shadow-red-500/30 animate-pulse"
+                : submitted.has(currentQ)
+                  ? "bg-gray-300 text-white"
+                  : "bg-brand-600 text-white shadow-lg shadow-brand-600/30 hover:bg-brand-700"
             }`}
           >
-            文字回答
+            {recorder.isRecording ? (
+              <Square className="h-8 w-8" />
+            ) : (
+              <Mic className="h-8 w-8" />
+            )}
           </button>
-          <button
-            onClick={() => setMode("audio")}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              mode === "audio" ? "bg-brand-50 text-brand-700" : "bg-gray-100 text-gray-500"
-            }`}
-          >
-            语音回答
-          </button>
+
+          {recorder.isRecording && (
+            <p className="text-sm font-medium text-red-500">
+              录音中... {recorder.duration}s
+            </p>
+          )}
+
+          {recorder.audioUrl && !recorder.isRecording && (
+            <div className="flex flex-col items-center gap-3">
+              <audio src={recorder.audioUrl} controls />
+              <div className="flex gap-3">
+                {!submitted.has(currentQ) && (
+                  <>
+                    <button
+                      onClick={recorder.resetRecording}
+                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                    >
+                      重录
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={submitting}
+                      className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none disabled:opacity-50"
+                    >
+                      {submitting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                      提交
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!recorder.isRecording && !recorder.audioUrl && !submitted.has(currentQ) && (
+            <p className="text-sm text-gray-400">点击麦克风用英语回答问题</p>
+          )}
+
+          {recorder.error && (
+            <p className="text-sm text-red-500">{recorder.error}</p>
+          )}
         </div>
 
-        {/* Text Mode */}
-        {mode === "text" && (
-          <div>
-            <textarea
-              value={textResponse}
-              onChange={(e) =>
-                setTextResponses({ ...textResponses, [currentQ]: e.target.value })
-              }
-              rows={6}
-              placeholder="Type your answer in English..."
-              className="w-full resize-none rounded-lg border border-gray-300 p-4 text-sm leading-relaxed outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
-              disabled={submitted.has(currentQ)}
-            />
-            <div className="mt-3 flex items-center justify-between">
-              <span className="text-xs text-gray-400">
-                {textResponse.split(/\s+/).filter(Boolean).length} words
-              </span>
-              {!submitted.has(currentQ) && (
-                <button
-                  onClick={handleSubmit}
-                  disabled={!textResponse.trim() || submitting}
-                  className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none disabled:opacity-50"
-                >
-                  {submitting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                  提交
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Audio Mode */}
-        {mode === "audio" && (
-          <div className="flex flex-col items-center gap-4 py-8">
-            <button
-              onClick={
-                recorder.isRecording ? recorder.stopRecording : recorder.startRecording
-              }
-              disabled={submitted.has(currentQ)}
-              className={`flex h-20 w-20 items-center justify-center rounded-full transition-all ${
-                recorder.isRecording
-                  ? "bg-red-500 text-white shadow-lg shadow-red-500/30 animate-pulse"
-                  : submitted.has(currentQ)
-                    ? "bg-gray-300 text-white"
-                    : "bg-brand-600 text-white shadow-lg shadow-brand-600/30 hover:bg-brand-700"
-              }`}
-            >
-              {recorder.isRecording ? (
-                <Square className="h-8 w-8" />
-              ) : (
-                <Mic className="h-8 w-8" />
-              )}
-            </button>
-
-            {recorder.isRecording && (
-              <p className="text-sm font-medium text-red-500">
-                录音中... {recorder.duration}s
-              </p>
-            )}
-
-            {recorder.audioUrl && !recorder.isRecording && (
-              <div className="flex flex-col items-center gap-3">
-                <audio src={recorder.audioUrl} controls />
-                <div className="flex gap-3">
-                  {!submitted.has(currentQ) && (
-                    <>
-                      <button
-                        onClick={recorder.resetRecording}
-                        className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
-                      >
-                        重录
-                      </button>
-                      <button
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                        className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none disabled:opacity-50"
-                      >
-                        {submitting ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Send className="h-4 w-4" />
-                        )}
-                        提交
-                      </button>
-                    </>
-                  )}
-                </div>
+        {/* Sample Answer (hidden by default) */}
+        {question.sampleAnswer && (
+          <div className="border-t border-gray-100 pt-4">
+            {showAnswer.has(currentQ) ? (
+              <div className="rounded-lg bg-brand-50 p-4">
+                <p className="mb-1 text-xs font-medium text-brand-600">推荐回答</p>
+                <p className="text-sm leading-relaxed text-brand-800">
+                  {question.sampleAnswer}
+                </p>
               </div>
-            )}
-
-            {!recorder.isRecording && !recorder.audioUrl && !submitted.has(currentQ) && (
-              <p className="text-sm text-gray-400">点击麦克风开始录音</p>
+            ) : (
+              <button
+                onClick={() =>
+                  setShowAnswer((prev) => new Set([...prev, currentQ]))
+                }
+                className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-gray-600"
+              >
+                <Eye className="h-4 w-4" />
+                查看推荐回答
+              </button>
             )}
           </div>
         )}
@@ -290,10 +262,11 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
         </Link>
         <Link
           href={`/lessons/${lessonId}/summary`}
-          onClick={() => updateProgress({ step: 4, expressionDone: submitted.size > 0 })}
+          onClick={() => updateProgress({ step: 5, expressionDone: submitted.size > 0 })}
           className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
         >
           下一步：学习总结
+          <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </div>

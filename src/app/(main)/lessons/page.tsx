@@ -126,7 +126,7 @@ export default async function LessonsPage() {
                       {Math.ceil(lesson.duration / 60)} 分钟
                     </span>
                   )}
-                  <span>5 步学习</span>
+                  <span>6 步学习</span>
                 </div>
               </div>
               <ArrowRight className="hidden h-4 w-4 shrink-0 text-gray-300 transition-colors group-hover:text-brand-500 sm:block" />

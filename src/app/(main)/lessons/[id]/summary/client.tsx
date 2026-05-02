@@ -39,7 +39,7 @@ export function SummaryStepClient({
   useEffect(() => {
     if (!tracked.current) {
       tracked.current = true;
-      updateProgress({ step: 5, summaryGenerated: true, completed: true });
+      updateProgress({ step: 6, summaryGenerated: true, completed: true });
     }
   }, [updateProgress]);
 

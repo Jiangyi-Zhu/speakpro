@@ -9,7 +9,7 @@ export default async function ExpressionStepPage({
 }) {
   const { id } = await params;
 
-  let questions: Array<{ id: string; question: string; hint: string | null }> = [];
+  let questions: Array<{ id: string; question: string; hint: string | null; sampleAnswer: string | null }> = [];
   try {
     questions = await prisma.expressionQuestion.findMany({
       where: { lessonId: id },
@@ -26,6 +26,7 @@ export default async function ExpressionStepPage({
         id: q.id,
         question: q.question,
         hint: q.hint || "",
+        sampleAnswer: q.sampleAnswer || "",
       }))}
     />
   );

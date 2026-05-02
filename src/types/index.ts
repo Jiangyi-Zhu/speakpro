@@ -20,9 +20,10 @@ export type VocabularyWithLesson = VocabularyItem & {
 export const LEARNING_STEPS = [
   { step: 1, key: "video", label: "视频学习", icon: "Play" },
   { step: 2, key: "vocabulary", label: "词汇预习", icon: "BookOpen" },
-  { step: 3, key: "sentences", label: "句子跟读", icon: "Mic" },
-  { step: 4, key: "expression", label: "自由表达", icon: "MessageSquare" },
-  { step: 5, key: "summary", label: "学习总结", icon: "Award" },
+  { step: 3, key: "word-study", label: "学习生词", icon: "GraduationCap" },
+  { step: 4, key: "sentences", label: "句子跟读", icon: "Mic" },
+  { step: 5, key: "expression", label: "自由表达", icon: "MessageSquare" },
+  { step: 6, key: "summary", label: "学习总结", icon: "Award" },
 ] as const;
 
 export type LearningStepKey = (typeof LEARNING_STEPS)[number]["key"];

@@ -11,6 +11,7 @@ import { useStudyTimer } from "@/hooks/use-study-timer";
 const shortLabels: Record<string, string> = {
   video: "视频",
   vocabulary: "词汇",
+  "word-study": "生词",
   sentences: "跟读",
   expression: "表达",
   summary: "总结",
