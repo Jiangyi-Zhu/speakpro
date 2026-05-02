@@ -9,7 +9,7 @@ export default function NotFound() {
       <p className="mb-6 text-sm text-gray-500">找不到你要访问的页面</p>
       <Link
         href="/"
-        className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+        className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
       >
         返回首页
       </Link>

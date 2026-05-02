@@ -237,7 +237,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
   return (
     <div className="space-y-4">
       {videoUrl && (
-        <div className="overflow-hidden rounded-xl bg-gray-900">
+        <div className="overflow-hidden rounded-2xl bg-gray-900">
           <video
             ref={videoRef}
             src={videoUrl}
@@ -268,7 +268,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
         {videoUrl && (
           <button
             onClick={togglePlay}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="flex items-center gap-1.5 rounded-xl bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700"
           >
             {isPlaying ? (
               <Pause className="h-4 w-4" />
@@ -333,7 +333,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
                 onClick={() => setGroupSize(size)}
                 className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors ${
                   groupSize === size
-                    ? "bg-blue-600 text-white"
+                    ? "bg-brand-600 text-white"
                     : "bg-white text-gray-500 hover:bg-gray-50"
                 }`}
               >
@@ -347,7 +347,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
             onClick={() => setShowEnglish(!showEnglish)}
             className={`flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               showEnglish
-                ? "bg-blue-50 text-blue-700"
+                ? "bg-brand-50 text-brand-700"
                 : "bg-gray-100 text-gray-500"
             }`}
           >
@@ -362,7 +362,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
             onClick={() => setShowChinese(!showChinese)}
             className={`flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               showChinese
-                ? "bg-blue-50 text-blue-700"
+                ? "bg-brand-50 text-brand-700"
                 : "bg-gray-100 text-gray-500"
             }`}
           >
@@ -377,7 +377,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
       </div>
 
       {/* Transcript */}
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-4">
         <h2 className="mb-3 text-base font-semibold text-gray-900">
           文本对照
         </h2>
@@ -399,7 +399,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
                   }}
                   className={`cursor-pointer rounded-lg p-3 transition-colors ${
                     isActive
-                      ? "bg-blue-50 ring-1 ring-blue-200"
+                      ? "bg-brand-50 ring-1 ring-brand-200"
                       : "hover:bg-gray-50"
                   }`}
                 >
@@ -408,7 +408,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
                       {formatTime(group.startTime)}
                     </span>
                     {isActive && (
-                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500" />
                     )}
                   </div>
                   {group.segments.map((seg) => {
@@ -423,9 +423,9 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
                           <p
                             className={`text-sm leading-relaxed ${
                               segIsActive
-                                ? "font-medium text-blue-900"
+                                ? "font-medium text-brand-900"
                                 : isActive
-                                  ? "text-blue-800"
+                                  ? "text-brand-800"
                                   : "text-gray-800"
                             }`}
                           >
@@ -457,7 +457,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
               updateProgress({ step: 1, videoWatched: true });
             }
           }}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
         >
           下一步：词汇预习
         </Link>

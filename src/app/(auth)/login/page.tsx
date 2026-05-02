@@ -49,7 +49,7 @@ function LoginForm() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2">
-            <BookOpen className="h-8 w-8 text-blue-600" />
+            <BookOpen className="h-8 w-8 text-brand-600" />
             <span className="text-2xl font-bold text-gray-900">SpeakPro</span>
           </Link>
           <p className="mt-2 text-sm text-gray-500">登录你的账号</p>
@@ -79,7 +79,7 @@ function LoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                   placeholder="your@email.com"
                 />
               </div>
@@ -96,7 +96,7 @@ function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-10 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-10 text-sm outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                   placeholder="输入密码"
                 />
                 <button
@@ -116,7 +116,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+              className="w-full rounded-xl bg-brand-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
             >
               {loading ? "登录中..." : "登录"}
             </button>
@@ -124,7 +124,7 @@ function LoginForm() {
 
           <div className="mt-6 text-center text-sm text-gray-500">
             还没有账号？{" "}
-            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-700">
+            <Link href="/register" className="font-medium text-brand-600 hover:text-brand-700">
               注册
             </Link>
           </div>

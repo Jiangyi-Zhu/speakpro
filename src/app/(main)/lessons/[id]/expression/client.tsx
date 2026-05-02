@@ -80,20 +80,20 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
   if (questions.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
           <MessageSquare className="mx-auto mb-3 h-10 w-10 text-gray-300" />
           <p className="text-sm text-gray-500">暂无表达练习题目</p>
         </div>
         <div className="flex items-center justify-between">
           <Link
             href={`/lessons/${lessonId}/sentences`}
-            className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             上一步
           </Link>
           <Link
             href={`/lessons/${lessonId}/summary`}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
           >
             下一步：学习总结
           </Link>
@@ -104,7 +104,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
+      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6">
         {/* Question */}
         <div className="mb-6">
           <div className="mb-2 flex items-center justify-between text-sm text-gray-400">
@@ -134,7 +134,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
           <button
             onClick={() => setMode("text")}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              mode === "text" ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-500"
+              mode === "text" ? "bg-brand-50 text-brand-700" : "bg-gray-100 text-gray-500"
             }`}
           >
             文字回答
@@ -142,7 +142,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
           <button
             onClick={() => setMode("audio")}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              mode === "audio" ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-500"
+              mode === "audio" ? "bg-brand-50 text-brand-700" : "bg-gray-100 text-gray-500"
             }`}
           >
             语音回答
@@ -159,7 +159,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
               }
               rows={6}
               placeholder="Type your answer in English..."
-              className="w-full resize-none rounded-lg border border-gray-300 p-4 text-sm leading-relaxed outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="w-full resize-none rounded-lg border border-gray-300 p-4 text-sm leading-relaxed outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
               disabled={submitted.has(currentQ)}
             />
             <div className="mt-3 flex items-center justify-between">
@@ -170,7 +170,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
                 <button
                   onClick={handleSubmit}
                   disabled={!textResponse.trim() || submitting}
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                 >
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -197,7 +197,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
                   ? "bg-red-500 text-white shadow-lg shadow-red-500/30 animate-pulse"
                   : submitted.has(currentQ)
                     ? "bg-gray-300 text-white"
-                    : "bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700"
+                    : "bg-brand-600 text-white shadow-lg shadow-brand-600/30 hover:bg-brand-700"
               }`}
             >
               {recorder.isRecording ? (
@@ -228,7 +228,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
                       <button
                         onClick={handleSubmit}
                         disabled={submitting}
-                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
                       >
                         {submitting ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -271,7 +271,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
                 if (recorder.isRecording) recorder.stopRecording();
                 recorder.resetRecording();
               }}
-              className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-30"
+              className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700 disabled:opacity-30"
             >
               下一题
               <ChevronRight className="h-4 w-4" />
@@ -284,14 +284,14 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
       <div className="flex items-center justify-between">
         <Link
           href={`/lessons/${lessonId}/sentences`}
-          className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           上一步
         </Link>
         <Link
           href={`/lessons/${lessonId}/summary`}
           onClick={() => updateProgress({ step: 4, expressionDone: submitted.size > 0 })}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
         >
           下一步：学习总结
         </Link>

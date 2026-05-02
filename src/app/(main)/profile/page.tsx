@@ -68,11 +68,11 @@ export default async function ProfilePage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
       {/* Profile Header */}
-      <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6">
+      <div className="mb-8 rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-              <User className="h-8 w-8 text-blue-600" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100">
+              <User className="h-8 w-8 text-brand-600" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">{user.name}</h1>
@@ -106,7 +106,7 @@ export default async function ProfilePage() {
       </div>
 
       {/* Menu */}
-      <div className="rounded-xl border border-gray-200 bg-white">
+      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm">
         {menuItems.map((item, i) => (
           <Link
             key={item.href}
@@ -129,11 +129,11 @@ export default async function ProfilePage() {
 
       {/* Not logged in prompt */}
       {!session?.user && (
-        <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-5 text-center">
-          <p className="mb-3 text-sm text-blue-800">登录后可保存学习进度和生词</p>
+        <div className="mt-6 rounded-xl border border-brand-200 bg-brand-50 p-5 text-center">
+          <p className="mb-3 text-sm text-brand-800">登录后可保存学习进度和生词</p>
           <Link
             href="/login"
-            className="inline-flex rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="inline-flex rounded-xl bg-brand-600 px-5 py-2 text-sm font-semibold text-white hover:bg-brand-700"
           >
             登录
           </Link>

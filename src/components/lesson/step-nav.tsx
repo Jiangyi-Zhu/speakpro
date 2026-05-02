@@ -33,7 +33,7 @@ export function StepNav({ lessonId, completedSteps = {} }: StepNavProps) {
   useStudyTimer();
 
   return (
-    <nav className="flex items-center gap-1 overflow-x-auto rounded-xl bg-gray-100 p-1">
+    <nav className="flex items-center gap-1.5 overflow-x-auto rounded-2xl bg-gray-100/80 p-1.5">
       {LEARNING_STEPS.map((step, i) => {
         const Icon = iconMap[step.icon];
         const href = `/lessons/${lessonId}/${step.key}`;
@@ -45,11 +45,11 @@ export function StepNav({ lessonId, completedSteps = {} }: StepNavProps) {
             key={step.key}
             href={href}
             className={cn(
-              "relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-all",
+              "relative flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium transition-all",
               isActive
-                ? "bg-white text-blue-700 shadow-sm"
+                ? "bg-white text-brand-700 shadow-sm"
                 : isCompleted
-                  ? "text-green-700 hover:bg-white/50"
+                  ? "text-brand-600 hover:bg-white/50"
                   : "text-gray-500 hover:bg-white/50 hover:text-gray-700"
             )}
           >

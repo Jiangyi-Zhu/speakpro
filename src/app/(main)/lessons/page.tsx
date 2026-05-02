@@ -51,11 +51,11 @@ export default async function LessonsPage() {
       </div>
 
       {!isLoggedIn && (
-        <div className="mb-6 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <p className="text-sm text-blue-800">登录后可保存学习进度、生词和录音</p>
+        <div className="mb-6 flex items-center justify-between rounded-2xl border border-brand-200 bg-brand-50 p-4">
+          <p className="text-sm text-brand-800">登录后可保存学习进度、生词和录音</p>
           <Link
             href="/login"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
           >
             登录
           </Link>
@@ -63,7 +63,7 @@ export default async function LessonsPage() {
       )}
 
       {lessons.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
           <Play className="mx-auto mb-3 h-10 w-10 text-gray-300" />
           <h3 className="mb-1 text-base font-medium text-gray-900">
             暂无课程
@@ -78,7 +78,7 @@ export default async function LessonsPage() {
             <Link
               key={lesson.id}
               href={`/lessons/${lesson.id}`}
-              className="group overflow-hidden rounded-xl border border-gray-200 bg-white transition-all hover:border-blue-200 hover:shadow-md"
+              className="group overflow-hidden rounded-2xl border border-gray-200/60 bg-white shadow-sm transition-all hover:border-brand-200 hover:shadow-md"
             >
               {/* Thumbnail */}
               <div className="relative aspect-video bg-gray-100">
@@ -95,7 +95,7 @@ export default async function LessonsPage() {
                 )}
                 <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/10">
                   <div className="rounded-full bg-white/90 p-3 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                    <Play className="h-5 w-5 text-blue-600" />
+                    <Play className="h-5 w-5 text-brand-600" />
                   </div>
                 </div>
                 {completedLessonIds.has(lesson.id) && (
@@ -119,7 +119,7 @@ export default async function LessonsPage() {
                     </span>
                   )}
                 </div>
-                <h3 className="mb-1 font-semibold text-gray-900 group-hover:text-blue-600">
+                <h3 className="mb-1 font-semibold text-gray-900 group-hover:text-brand-600">
                   {lesson.title}
                 </h3>
                 {lesson.description && (

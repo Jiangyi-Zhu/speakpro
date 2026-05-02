@@ -27,7 +27,7 @@ export default function RootLayout({
       lang="zh-CN"
       className="h-full antialiased"
     >
-      <body className="min-h-full flex flex-col bg-white text-gray-900">
+      <body className="min-h-full flex flex-col bg-stone-50 text-gray-900">
         <Providers>{children}</Providers>
       </body>
     </html>

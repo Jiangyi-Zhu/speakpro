@@ -133,7 +133,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
   if (segments.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
           <BookOpen className="mx-auto mb-3 h-10 w-10 text-gray-300" />
           <p className="text-sm text-gray-500">暂无句子内容</p>
         </div>
@@ -148,7 +148,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
         <button
           onClick={() => setShowTranslation(!showTranslation)}
           className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-            showTranslation ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-500"
+            showTranslation ? "bg-brand-50 text-brand-700" : "bg-gray-100 text-gray-500"
           }`}
         >
           {showTranslation ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
@@ -157,7 +157,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
         <button
           onClick={() => setShowGrammar(!showGrammar)}
           className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-            showGrammar ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-500"
+            showGrammar ? "bg-brand-50 text-brand-700" : "bg-gray-100 text-gray-500"
           }`}
         >
           语法解析
@@ -165,7 +165,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
       </div>
 
       {/* Sentence Card */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
+      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6">
         {/* Progress + Save */}
         <div className="mb-4 flex items-center justify-between text-sm text-gray-400">
           <span>
@@ -187,7 +187,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
         {/* Progress bar */}
         <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-gray-100">
           <div
-            className="h-full rounded-full bg-blue-600 transition-all duration-300"
+            className="h-full rounded-full bg-brand-600 transition-all duration-300"
             style={{ width: `${((currentIndex + 1) / segments.length) * 100}%` }}
           />
         </div>
@@ -204,7 +204,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
 
         {/* Grammar */}
         {showGrammar && currentSegment.grammarNote && (
-          <div className="mb-4 rounded-lg bg-blue-50 p-3 text-sm leading-relaxed text-blue-800">
+          <div className="mb-4 rounded-lg bg-brand-50 p-3 text-sm leading-relaxed text-brand-800">
             {currentSegment.grammarNote}
           </div>
         )}
@@ -214,7 +214,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
           <div className="mt-6 flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
             <button
               onClick={() => originalAudioRef.current?.play()}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-700"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white hover:bg-brand-700"
             >
               <Play className="h-3.5 w-3.5" />
             </button>
@@ -233,7 +233,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
             className={`flex h-16 w-16 items-center justify-center rounded-full transition-all ${
               recorder.isRecording
                 ? "bg-red-500 text-white shadow-lg shadow-red-500/30 animate-pulse"
-                : "bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700"
+                : "bg-brand-600 text-white shadow-lg shadow-brand-600/30 hover:bg-brand-700"
             }`}
           >
             {recorder.isRecording ? (
@@ -300,7 +300,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
             <Link
               href={`/lessons/${lessonId}/expression`}
               onClick={() => updateProgress({ step: 3, sentencesCompleted: true })}
-              className="flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className="flex items-center gap-1 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
             >
               下一步：自由表达
               <ArrowRight className="h-4 w-4" />
@@ -308,7 +308,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
           ) : (
             <button
               onClick={goNext}
-              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-blue-600 hover:bg-blue-50"
+              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-brand-600 hover:bg-brand-50"
             >
               下一句
               <ChevronRight className="h-4 w-4" />
@@ -321,7 +321,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
       <div className="flex items-center justify-between">
         <Link
           href={`/lessons/${lessonId}/vocabulary`}
-          className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           上一步
         </Link>

@@ -70,7 +70,7 @@ export function VocabularyBookClient({ initialWords }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="搜索单词..."
-            className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
           />
         </div>
         <div className="flex gap-2">
@@ -80,7 +80,7 @@ export function VocabularyBookClient({ initialWords }: Props) {
               onClick={() => setFilter(f)}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 filter === f
-                  ? "bg-blue-50 text-blue-700"
+                  ? "bg-brand-50 text-brand-700"
                   : "bg-gray-100 text-gray-500 hover:bg-gray-200"
               }`}
             >
@@ -92,7 +92,7 @@ export function VocabularyBookClient({ initialWords }: Props) {
 
       {/* Word List */}
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
           <BookOpen className="mx-auto mb-3 h-10 w-10 text-gray-300" />
           <p className="text-sm text-gray-500">
             {words.length === 0
@@ -105,7 +105,7 @@ export function VocabularyBookClient({ initialWords }: Props) {
           {filtered.map((word) => (
             <div
               key={word.id}
-              className="rounded-xl border border-gray-200 bg-white p-4"
+              className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-4"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -135,7 +135,7 @@ export function VocabularyBookClient({ initialWords }: Props) {
                   className={`rounded-lg p-2 transition-colors ${
                     word.mastered
                       ? "bg-green-100 text-green-600 hover:bg-green-200"
-                      : "bg-gray-100 text-gray-400 hover:bg-blue-100 hover:text-blue-600"
+                      : "bg-gray-100 text-gray-400 hover:bg-brand-100 hover:text-brand-600"
                   }`}
                   title={word.mastered ? "标记为未掌握" : "标记为已掌握"}
                 >

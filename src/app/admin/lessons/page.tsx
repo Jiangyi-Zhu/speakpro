@@ -32,7 +32,7 @@ export default async function AdminLessonsPage() {
         <h1 className="text-2xl font-bold text-gray-900">课程管理</h1>
         <Link
           href="/admin/lessons/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
         >
           <Plus className="h-4 w-4" />
           新建课程
@@ -40,7 +40,7 @@ export default async function AdminLessonsPage() {
       </div>
 
       {lessons.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-300 p-12 text-center">
           <p className="text-sm text-gray-500">还没有课程，点击「新建课程」开始</p>
         </div>
       ) : (
@@ -82,7 +82,7 @@ export default async function AdminLessonsPage() {
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/admin/lessons/${lesson.id}/edit`}
-                        className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-blue-600"
+                        className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-brand-600"
                         title="编辑"
                       >
                         <Pencil className="h-4 w-4" />

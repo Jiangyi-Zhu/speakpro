@@ -63,7 +63,7 @@ export default async function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-4 py-24 text-white sm:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 px-4 py-24 text-white sm:py-32">
         <div className="mx-auto max-w-4xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm backdrop-blur-sm">
             <BookOpen className="h-4 w-4" />
@@ -74,14 +74,14 @@ export default async function LandingPage() {
             <br />
             练出地道职场英语
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-blue-100 sm:text-xl">
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-brand-100 sm:text-xl">
             科学的五步学习法，从视频观看到口语表达，帮你系统提升职场英语交流能力
           </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             {isLoggedIn ? (
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-blue-700 shadow-lg transition-all hover:bg-blue-50 hover:shadow-xl"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-brand-700 shadow-lg transition-all hover:bg-brand-50 hover:shadow-xl"
               >
                 进入学习中心
                 <ArrowRight className="h-4 w-4" />
@@ -90,7 +90,7 @@ export default async function LandingPage() {
               <>
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-blue-700 shadow-lg transition-all hover:bg-blue-50 hover:shadow-xl"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-brand-700 shadow-lg transition-all hover:bg-brand-50 hover:shadow-xl"
                 >
                   免费注册
                   <ArrowRight className="h-4 w-4" />
@@ -121,10 +121,10 @@ export default async function LandingPage() {
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
             {steps.map((step, i) => (
               <div key={i} className="group text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">
                   <step.icon className="h-7 w-7" />
                 </div>
-                <div className="mb-1 text-xs font-semibold text-blue-600">
+                <div className="mb-1 text-xs font-semibold text-brand-600">
                   Step {i + 1}
                 </div>
                 <h3 className="mb-2 text-base font-semibold text-gray-900">
@@ -148,7 +148,7 @@ export default async function LandingPage() {
           </p>
           <Link
             href="/lessons"
-            className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:bg-brand-700 hover:shadow-xl"
           >
             浏览课程
             <ArrowRight className="h-4 w-4" />

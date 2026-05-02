@@ -48,7 +48,7 @@ export function SummaryStepClient({
       icon: BookOpen,
       label: "学习词汇",
       value: `${wordsLearned} 个`,
-      color: "text-blue-600 bg-blue-50",
+      color: "text-brand-600 bg-brand-50",
     },
     {
       icon: BookOpen,
@@ -73,7 +73,7 @@ export function SummaryStepClient({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-gray-200 bg-white p-8">
+      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-8">
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
@@ -101,17 +101,17 @@ export function SummaryStepClient({
         </div>
 
         {/* Share Card */}
-        <div className="mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white">
+        <div className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 p-6 text-white">
           <div className="mb-4 flex items-center gap-2">
             <BookOpen className="h-5 w-5" />
             <span className="font-semibold">SpeakPro</span>
           </div>
           <p className="mb-1 text-lg font-bold">今日学习完成</p>
-          <p className="text-sm text-blue-100">
+          <p className="text-sm text-brand-100">
             学习了 {wordsLearned} 个词汇，收藏 {savedSentences} 个句子
             {recordingsMade > 0 && `，录音 ${recordingsMade} 次`}
           </p>
-          <div className="mt-4 flex gap-4 text-xs text-blue-200">
+          <div className="mt-4 flex gap-4 text-xs text-brand-200">
             <span className="flex items-center gap-1">
               {expressionDone ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
               自由表达
@@ -130,13 +130,13 @@ export function SummaryStepClient({
       <div className="flex items-center justify-between">
         <Link
           href={`/lessons/${lessonId}/expression`}
-          className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           上一步
         </Link>
         <Link
           href="/lessons"
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
         >
           继续学习下一课
           <ArrowRight className="h-4 w-4" />

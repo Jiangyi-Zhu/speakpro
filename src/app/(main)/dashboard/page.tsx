@@ -109,7 +109,7 @@ export default async function DashboardPage() {
       {/* Stats */}
       <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {statItems.map((stat) => (
-          <div key={stat.label} className="rounded-xl border border-gray-200 bg-white p-5">
+          <div key={stat.label} className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-5">
             <div className={`mb-3 inline-flex rounded-lg p-2 ${stat.color}`}>
               <stat.icon className="h-5 w-5" />
             </div>
@@ -127,7 +127,7 @@ export default async function DashboardPage() {
           </h2>
           <Link
             href="/lessons"
-            className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+            className="flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
           >
             全部课程
             <ArrowRight className="h-4 w-4" />
@@ -135,12 +135,12 @@ export default async function DashboardPage() {
         </div>
 
         {recentLessons.length === 0 ? (
-          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
+          <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-8 text-center">
             <BookOpen className="mx-auto mb-3 h-10 w-10 text-gray-300" />
             <p className="mb-4 text-sm text-gray-500">还没有开始学习</p>
             <Link
               href="/lessons"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
             >
               浏览课程
               <ArrowRight className="h-4 w-4" />
@@ -152,11 +152,11 @@ export default async function DashboardPage() {
               <Link
                 key={lesson.id}
                 href={`/lessons/${lesson.id}/${stepPaths[lesson.step] || "video"}`}
-                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 transition-colors hover:border-blue-200 hover:bg-blue-50/30"
+                className="flex items-center justify-between rounded-2xl border border-gray-200/60 bg-white shadow-sm p-4 transition-colors hover:border-brand-200 hover:bg-brand-50/30"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-                    <Play className="h-5 w-5 text-blue-600" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50">
+                    <Play className="h-5 w-5 text-brand-600" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{lesson.title}</p>
@@ -180,7 +180,7 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold text-gray-900">成就</h2>
           <Link
             href="/achievements"
-            className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+            className="flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
           >
             查看全部
             <ArrowRight className="h-4 w-4" />
@@ -199,7 +199,7 @@ export default async function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
+          <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6 text-center">
             <Award className="mx-auto mb-2 h-8 w-8 text-gray-300" />
             <p className="text-sm text-gray-500">完成学习任务解锁成就</p>
           </div>

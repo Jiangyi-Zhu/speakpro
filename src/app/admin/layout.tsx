@@ -28,9 +28,9 @@ export default async function AdminLayout({
     <div className="flex min-h-screen">
       <aside className="flex w-60 flex-col border-r border-gray-200 bg-gray-50">
         <div className="flex h-16 items-center gap-2 border-b border-gray-200 px-5">
-          <BookOpen className="h-6 w-6 text-blue-600" />
+          <BookOpen className="h-6 w-6 text-brand-600" />
           <span className="font-bold text-gray-900">SpeakPro</span>
-          <span className="ml-1 rounded bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700">
+          <span className="ml-1 rounded bg-brand-100 px-1.5 py-0.5 text-xs font-medium text-brand-700">
             Admin
           </span>
         </div>

@@ -82,7 +82,7 @@ export default async function AchievementsPage() {
       </div>
 
       {achievements.length === 0 && (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
           <Award className="mx-auto mb-3 h-10 w-10 text-gray-300" />
           <p className="text-sm text-gray-500">暂无成就数据</p>
         </div>

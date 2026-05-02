@@ -145,7 +145,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
   if (phase === "mark") {
     return (
       <div className="space-y-6">
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
+        <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6">
           <div className="mb-4">
             <h2 className="text-base font-semibold text-gray-900">阅读文章，点击标记生词</h2>
           </div>
@@ -165,7 +165,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
                         className={`cursor-pointer rounded px-0.5 transition-colors ${
                           isMarked
                             ? "bg-yellow-200 text-yellow-900"
-                            : "hover:bg-blue-100"
+                            : "hover:bg-brand-100"
                         }`}
                       >
                         {token}
@@ -203,14 +203,14 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
         <div className="flex items-center justify-between">
           <Link
             href={`/lessons/${lessonId}/video`}
-            className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             上一步
           </Link>
           {wordList.length > 0 ? (
             <button
               onClick={startLearning}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
             >
               开始学习生词 ({wordList.length})
               <ArrowRight className="h-4 w-4" />
@@ -224,7 +224,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
                   updateProgress({ step: 2, vocabCompleted: true });
                 }
               }}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
             >
               没有生词，下一步
               <ArrowRight className="h-4 w-4" />
@@ -238,7 +238,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
   // Phase 2: Learn words (flashcard style)
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
+      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6">
         {/* Progress */}
         <div className="mb-2 flex items-center justify-between text-sm text-gray-400">
           <span className="flex items-center gap-1.5">
@@ -254,7 +254,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
         </div>
         <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-gray-100">
           <div
-            className="h-full rounded-full bg-blue-600 transition-all duration-300"
+            className="h-full rounded-full bg-brand-600 transition-all duration-300"
             style={{ width: `${((learnIndex + 1) / wordList.length) * 100}%` }}
           />
         </div>
@@ -271,7 +271,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
             {currentContext && (
               <div
                 className={`rounded-xl p-5 transition-all ${
-                  showMeaning ? "bg-blue-50" : "bg-gray-50"
+                  showMeaning ? "bg-brand-50" : "bg-gray-50"
                 }`}
               >
                 <p className="mb-1 text-xs font-medium text-gray-400">原文语境</p>
@@ -280,15 +280,15 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
                 </p>
 
                 {showMeaning ? (
-                  <div className="mt-3 border-t border-blue-200 pt-3">
-                    <p className="text-sm leading-relaxed text-blue-800">
+                  <div className="mt-3 border-t border-brand-200 pt-3">
+                    <p className="text-sm leading-relaxed text-brand-800">
                       {currentContext.textZh}
                     </p>
                   </div>
                 ) : (
                   <button
                     onClick={() => setShowMeaning(true)}
-                    className="mt-3 flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+                    className="mt-3 flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
                   >
                     <Eye className="h-4 w-4" />
                     查看中文翻译
@@ -324,7 +324,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
                   updateProgress({ step: 2, vocabCompleted: true });
                 }
               }}
-              className="flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className="flex items-center gap-1 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
             >
               学完了，下一步
               <ArrowRight className="h-4 w-4" />
@@ -332,7 +332,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
           ) : (
             <button
               onClick={nextCard}
-              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-blue-600 hover:bg-blue-50"
+              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-brand-600 hover:bg-brand-50"
             >
               下一个
               <ChevronRight className="h-4 w-4" />

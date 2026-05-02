@@ -287,7 +287,7 @@ export default function EditLessonPage() {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                 placeholder="例如：Job Interview Skills"
               />
             </div>
@@ -299,7 +299,7 @@ export default function EditLessonPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                className="w-full resize-none rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full resize-none rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -310,7 +310,7 @@ export default function EditLessonPage() {
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-brand-500"
                 >
                   <option value="BEGINNER">入门</option>
                   <option value="INTERMEDIATE">中级</option>
@@ -325,7 +325,7 @@ export default function EditLessonPage() {
                   type="text"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                   placeholder="面试、会议、邮件..."
                 />
               </div>
@@ -336,7 +336,7 @@ export default function EditLessonPage() {
                   type="checkbox"
                   checked={published}
                   onChange={(e) => setPublished(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                 />
                 <span className="text-sm font-medium text-gray-700">发布课程</span>
               </label>
@@ -357,7 +357,7 @@ export default function EditLessonPage() {
                 type="url"
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                 placeholder="https://... (支持 MP4 直链、YouTube 等)"
               />
             </div>
@@ -374,7 +374,7 @@ export default function EditLessonPage() {
             上传 SRT 或 VTT 字幕文件，自动解析为逐句内容
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 p-4 text-sm text-gray-500 transition-colors hover:border-blue-400 hover:text-blue-600">
+            <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 p-4 text-sm text-gray-500 transition-colors hover:border-brand-400 hover:text-brand-600">
               <FileText className="h-4 w-4" />
               导入英文字幕
               <input
@@ -385,7 +385,7 @@ export default function EditLessonPage() {
                 disabled={importing}
               />
             </label>
-            <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 p-4 text-sm text-gray-500 transition-colors hover:border-blue-400 hover:text-blue-600">
+            <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 p-4 text-sm text-gray-500 transition-colors hover:border-brand-400 hover:text-brand-600">
               <FileText className="h-4 w-4" />
               导入中文字幕
               <input
@@ -398,7 +398,7 @@ export default function EditLessonPage() {
             </label>
           </div>
           {importing && (
-            <div className="mt-3 flex items-center gap-2 text-sm text-blue-600">
+            <div className="mt-3 flex items-center gap-2 text-sm text-brand-600">
               <Loader2 className="h-4 w-4 animate-spin" />
               正在导入...
             </div>
@@ -464,21 +464,21 @@ export default function EditLessonPage() {
                       onChange={(e) => updateSegment(i, "textEn", e.target.value)}
                       rows={2}
                       placeholder="英文原文"
-                      className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                      className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
                     />
                     <textarea
                       value={seg.textZh}
                       onChange={(e) => updateSegment(i, "textZh", e.target.value)}
                       rows={2}
                       placeholder="中文翻译"
-                      className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                      className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
                     />
                     <textarea
                       value={seg.grammarNote}
                       onChange={(e) => updateSegment(i, "grammarNote", e.target.value)}
                       rows={1}
                       placeholder="语法解析（可选）"
-                      className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                      className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
                     />
                   </div>
                 </div>
@@ -526,13 +526,13 @@ export default function EditLessonPage() {
                       value={q.question}
                       onChange={(e) => updateQuestion(i, "question", e.target.value)}
                       placeholder="问题内容（英文）"
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
                     />
                     <input
                       value={q.hint}
                       onChange={(e) => updateQuestion(i, "hint", e.target.value)}
                       placeholder="提示/引导（可选）"
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
                     />
                   </div>
                 </div>
@@ -545,14 +545,14 @@ export default function EditLessonPage() {
         <div className="flex justify-end gap-3 pb-8">
           <Link
             href="/admin/lessons"
-            className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             取消
           </Link>
           <button
             onClick={handleSave}
             disabled={saving || !title.trim()}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" />
