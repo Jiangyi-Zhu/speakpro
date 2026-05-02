@@ -36,6 +36,7 @@ export default async function SentencesStepPage({
   }));
 
   let savedSegmentIds: string[] = [];
+  let initialRecordings: Record<string, string> = {};
   try {
     const session = await auth();
     if (session?.user?.id) {
@@ -44,6 +45,17 @@ export default async function SentencesStepPage({
         select: { segmentId: true },
       });
       savedSegmentIds = saved.map((s) => s.segmentId);
+
+      const recordings = await prisma.recording.findMany({
+        where: { userId: session.user.id, lessonId: id, segmentId: { not: null } },
+        select: { segmentId: true, audioUrl: true },
+        orderBy: { createdAt: "desc" },
+      });
+      for (const r of recordings) {
+        if (r.segmentId && !initialRecordings[r.segmentId]) {
+          initialRecordings[r.segmentId] = r.audioUrl;
+        }
+      }
     }
   } catch {
     // not logged in or DB error
@@ -55,6 +67,7 @@ export default async function SentencesStepPage({
       videoUrl={lesson.videoUrl}
       segments={segments}
       initialSavedSegmentIds={savedSegmentIds}
+      initialRecordings={initialRecordings}
     />
   );
 }

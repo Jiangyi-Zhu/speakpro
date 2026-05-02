@@ -15,7 +15,6 @@ import {
   Loader2,
   Play,
   ArrowRight,
-  Volume2,
   Pause,
 } from "lucide-react";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
@@ -37,6 +36,7 @@ interface Props {
   videoUrl: string | null;
   segments: Segment[];
   initialSavedSegmentIds?: string[];
+  initialRecordings?: Record<string, string>;
 }
 
 export function SentencesStepClient({
@@ -44,6 +44,7 @@ export function SentencesStepClient({
   videoUrl,
   segments,
   initialSavedSegmentIds = [],
+  initialRecordings = {},
 }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(true);
@@ -51,22 +52,39 @@ export function SentencesStepClient({
     new Set(initialSavedSegmentIds)
   );
   const [savingSentence, setSavingSentence] = useState(false);
-  const [recordingsSaved, setRecordingsSaved] = useState<Set<number>>(
-    new Set()
-  );
+  const [recordingsSaved, setRecordingsSaved] = useState<Set<number>>(() => {
+    const set = new Set<number>();
+    segments.forEach((seg, idx) => {
+      if (initialRecordings[seg.id]) set.add(idx);
+    });
+    return set;
+  });
   const [savingRecording, setSavingRecording] = useState(false);
   const [isPlayingOriginal, setIsPlayingOriginal] = useState(false);
+  const [segmentAudioUrls, setSegmentAudioUrls] = useState<Map<number, string>>(
+    () => {
+      const map = new Map<number, string>();
+      segments.forEach((seg, idx) => {
+        if (initialRecordings[seg.id]) {
+          map.set(idx, initialRecordings[seg.id]);
+        }
+      });
+      return map;
+    }
+  );
 
   const recorder = useAudioRecorder();
   const { updateProgress } = useProgress(lessonId);
   const originalAudioRef = useRef<HTMLAudioElement>(null);
   const videoAudioRef = useRef<HTMLAudioElement | null>(null);
   const endTimeRef = useRef<number>(0);
+  const recorderSegmentRef = useRef<number>(-1);
 
   const currentSegment = segments[currentIndex];
   const hasAudio =
     currentSegment?.audioUrl ||
     (videoUrl && currentSegment?.startTime != null);
+  const currentRecordingUrl = segmentAudioUrls.get(currentIndex);
 
   useEffect(() => {
     if (!videoUrl) return;
@@ -177,18 +195,36 @@ export function SentencesStepClient({
   );
 
   useEffect(() => {
-    if (
-      recorder.audioBlob &&
-      !recorder.isRecording &&
-      !recordingsSaved.has(currentIndex)
-    ) {
-      saveRecording(recorder.audioBlob, currentSegment.id, currentIndex);
+    if (recorder.audioBlob && !recorder.isRecording) {
+      const idx = recorderSegmentRef.current;
+      if (idx >= 0 && idx < segments.length) {
+        const url = URL.createObjectURL(recorder.audioBlob);
+        setSegmentAudioUrls((prev) => new Map(prev).set(idx, url));
+        if (!recordingsSaved.has(idx)) {
+          saveRecording(recorder.audioBlob, segments[idx].id, idx);
+        }
+      }
     }
   }, [recorder.audioBlob, recorder.isRecording]);
 
   function startRecording() {
     stopOriginalAudio();
+    recorderSegmentRef.current = currentIndex;
     recorder.startRecording();
+  }
+
+  function handleReRecord() {
+    setSegmentAudioUrls((prev) => {
+      const next = new Map(prev);
+      next.delete(currentIndex);
+      return next;
+    });
+    setRecordingsSaved((prev) => {
+      const next = new Set(prev);
+      next.delete(currentIndex);
+      return next;
+    });
+    recorder.resetRecording();
   }
 
   function goNext() {
@@ -196,7 +232,6 @@ export function SentencesStepClient({
       setCurrentIndex(currentIndex + 1);
       stopOriginalAudio();
       if (recorder.isRecording) recorder.stopRecording();
-      recorder.resetRecording();
     }
   }
 
@@ -205,7 +240,6 @@ export function SentencesStepClient({
       setCurrentIndex(currentIndex - 1);
       stopOriginalAudio();
       if (recorder.isRecording) recorder.stopRecording();
-      recorder.resetRecording();
     }
   }
 
@@ -262,82 +296,85 @@ export function SentencesStepClient({
           <p className="mb-4 text-sm text-gray-500">{currentSegment.textZh}</p>
         )}
 
-        {/* Audio row: Play original (left) + Record (right) */}
-        <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
+        {/* Audio row: Play original + Record together */}
+        <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
           {/* Play original */}
-          <div className="flex items-center gap-2.5">
-            {hasAudio ? (
-              <button
-                onClick={() =>
-                  isPlayingOriginal
-                    ? stopOriginalAudio()
-                    : playSegmentAudio(currentSegment)
-                }
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white transition-colors ${
-                  isPlayingOriginal
-                    ? "bg-orange-500"
-                    : "bg-brand-600 hover:bg-brand-700"
-                }`}
-              >
-                {isPlayingOriginal ? (
-                  <Pause className="h-4 w-4" />
-                ) : (
-                  <Play className="h-4 w-4" />
-                )}
-              </button>
-            ) : (
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-400">
-                <Play className="h-4 w-4" />
-              </div>
-            )}
-            <span className="text-sm text-gray-500">
-              {isPlayingOriginal ? "播放中" : "原音"}
-            </span>
-            {currentSegment.audioUrl && (
-              <audio ref={originalAudioRef} src={currentSegment.audioUrl} />
-            )}
-          </div>
-
-          {/* Record */}
-          <div className="flex items-center gap-2.5">
-            <span className="text-sm text-gray-500">
-              {recorder.isRecording ? `${recorder.duration}s` : "跟读"}
-            </span>
+          {hasAudio ? (
             <button
-              onClick={
-                recorder.isRecording ? recorder.stopRecording : startRecording
+              onClick={() =>
+                isPlayingOriginal
+                  ? stopOriginalAudio()
+                  : playSegmentAudio(currentSegment)
               }
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all ${
-                recorder.isRecording
-                  ? "bg-red-500 text-white animate-pulse"
-                  : "bg-brand-600 text-white hover:bg-brand-700"
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white transition-colors ${
+                isPlayingOriginal
+                  ? "bg-orange-500"
+                  : "bg-brand-600 hover:bg-brand-700"
               }`}
             >
-              {recorder.isRecording ? (
-                <Square className="h-4 w-4" />
+              {isPlayingOriginal ? (
+                <Pause className="h-4 w-4" />
               ) : (
-                <Mic className="h-4 w-4" />
+                <Play className="h-4 w-4" />
               )}
             </button>
-          </div>
+          ) : (
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-400">
+              <Play className="h-4 w-4" />
+            </div>
+          )}
+          <span className="text-sm text-gray-500">
+            {isPlayingOriginal ? "播放中" : "原音"}
+          </span>
+          {currentSegment.audioUrl && (
+            <audio ref={originalAudioRef} src={currentSegment.audioUrl} />
+          )}
+
+          <div className="mx-1 h-6 w-px bg-gray-200" />
+
+          {/* Record */}
+          <button
+            onClick={
+              recorder.isRecording ? recorder.stopRecording : startRecording
+            }
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all ${
+              recorder.isRecording
+                ? "bg-red-500 text-white animate-pulse"
+                : "bg-brand-600 text-white hover:bg-brand-700"
+            }`}
+          >
+            {recorder.isRecording ? (
+              <Square className="h-4 w-4" />
+            ) : (
+              <Mic className="h-4 w-4" />
+            )}
+          </button>
+          <span className="text-sm text-gray-500">
+            {recorder.isRecording ? `${recorder.duration}s` : "跟读"}
+          </span>
+
+          {currentRecordingUrl && !recorder.isRecording && (
+            <Check className="ml-auto h-4 w-4 text-green-600" />
+          )}
         </div>
 
         {/* Recording playback */}
-        {recorder.audioUrl && !recorder.isRecording && (
+        {currentRecordingUrl && !recorder.isRecording && (
           <div className="mt-3 flex items-center gap-3">
-            <audio src={recorder.audioUrl} controls className="h-9 flex-1" />
+            <audio
+              src={currentRecordingUrl}
+              controls
+              className="h-9 flex-1"
+            />
             <button
-              onClick={recorder.resetRecording}
+              onClick={handleReRecord}
               className="flex items-center gap-1 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
             >
               <RotateCcw className="h-3 w-3" />
               重录
             </button>
-            {savingRecording && (
+            {savingRecording && recorderSegmentRef.current === currentIndex && (
               <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" />
-            )}
-            {recordingsSaved.has(currentIndex) && !savingRecording && (
-              <Check className="h-3.5 w-3.5 text-green-600" />
             )}
           </div>
         )}
