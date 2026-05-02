@@ -114,6 +114,9 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
 
     const onTimeUpdate = () => {
       const t = video.currentTime;
+      if (video.playbackRate !== playbackRateRef.current) {
+        video.playbackRate = playbackRateRef.current;
+      }
       const idx = findActiveSegment(t);
       setActiveSegIndex(idx);
 

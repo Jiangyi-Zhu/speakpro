@@ -8,8 +8,6 @@ import {
   RotateCcw,
   Bookmark,
   BookmarkCheck,
-  Eye,
-  EyeOff,
   ChevronLeft,
   ChevronRight,
   BookOpen,
@@ -40,17 +38,22 @@ interface Props {
   initialSavedSegmentIds?: string[];
 }
 
-export function SentencesStepClient({ lessonId, videoUrl, segments, initialSavedSegmentIds = [] }: Props) {
+export function SentencesStepClient({
+  lessonId,
+  videoUrl,
+  segments,
+  initialSavedSegmentIds = [],
+}: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(true);
-  const [showGrammar, setShowGrammar] = useState(false);
   const [savedSegmentIds, setSavedSegmentIds] = useState<Set<string>>(
     new Set(initialSavedSegmentIds)
   );
   const [savingSentence, setSavingSentence] = useState(false);
-  const [recordingsSaved, setRecordingsSaved] = useState<Set<number>>(new Set());
+  const [recordingsSaved, setRecordingsSaved] = useState<Set<number>>(
+    new Set()
+  );
   const [savingRecording, setSavingRecording] = useState(false);
-
   const [isPlayingOriginal, setIsPlayingOriginal] = useState(false);
 
   const recorder = useAudioRecorder();
@@ -58,6 +61,11 @@ export function SentencesStepClient({ lessonId, videoUrl, segments, initialSaved
   const originalAudioRef = useRef<HTMLAudioElement>(null);
   const videoAudioRef = useRef<HTMLAudioElement | null>(null);
   const stopTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const currentSegment = segments[currentIndex];
+  const hasAudio =
+    currentSegment?.audioUrl ||
+    (videoUrl && currentSegment?.startTime != null);
 
   function playSegmentAudio(seg: Segment) {
     if (seg.audioUrl) {
@@ -81,8 +89,6 @@ export function SentencesStepClient({ lessonId, videoUrl, segments, initialSaved
       setIsPlayingOriginal(false);
     }, duration);
   }
-
-  const currentSegment = segments[currentIndex];
 
   async function toggleSave() {
     const segmentId = currentSegment.id;
@@ -110,37 +116,44 @@ export function SentencesStepClient({ lessonId, videoUrl, segments, initialSaved
         setSavedSegmentIds((prev) => new Set([...prev, segmentId]));
       }
     } catch {
-      // ignore - user may not be logged in
+      // ignore
     }
 
     setSavingSentence(false);
   }
 
-  const saveRecording = useCallback(async (blob: Blob, segId: string, idx: number) => {
-    setSavingRecording(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", blob, "recording.webm");
-      formData.append("lessonId", lessonId);
-      formData.append("segmentId", segId);
-      formData.append("duration", String(recorder.duration));
+  const saveRecording = useCallback(
+    async (blob: Blob, segId: string, idx: number) => {
+      setSavingRecording(true);
+      try {
+        const formData = new FormData();
+        formData.append("file", blob, "recording.webm");
+        formData.append("lessonId", lessonId);
+        formData.append("segmentId", segId);
+        formData.append("duration", String(recorder.duration));
 
-      const res = await fetch("/api/upload-recording", {
-        method: "POST",
-        body: formData,
-      });
+        const res = await fetch("/api/upload-recording", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (res.ok) {
-        setRecordingsSaved((prev) => new Set([...prev, idx]));
+        if (res.ok) {
+          setRecordingsSaved((prev) => new Set([...prev, idx]));
+        }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
-    }
-    setSavingRecording(false);
-  }, [lessonId, recorder.duration]);
+      setSavingRecording(false);
+    },
+    [lessonId, recorder.duration]
+  );
 
   useEffect(() => {
-    if (recorder.audioBlob && !recorder.isRecording && !recordingsSaved.has(currentIndex)) {
+    if (
+      recorder.audioBlob &&
+      !recorder.isRecording &&
+      !recordingsSaved.has(currentIndex)
+    ) {
       saveRecording(recorder.audioBlob, currentSegment.id, currentIndex);
     }
   }, [recorder.audioBlob, recorder.isRecording]);
@@ -182,27 +195,6 @@ export function SentencesStepClient({ lessonId, videoUrl, segments, initialSaved
 
   return (
     <div className="space-y-6">
-      {/* Controls */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => setShowTranslation(!showTranslation)}
-          className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-            showTranslation ? "bg-brand-50 text-brand-700" : "bg-gray-100 text-gray-500"
-          }`}
-        >
-          {showTranslation ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-          中文翻译
-        </button>
-        <button
-          onClick={() => setShowGrammar(!showGrammar)}
-          className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-            showGrammar ? "bg-brand-50 text-brand-700" : "bg-gray-100 text-gray-500"
-          }`}
-        >
-          语法解析
-        </button>
-      </div>
-
       {/* Sentence Card */}
       <div className="rounded-2xl bg-white shadow-sm p-6">
         {/* Progress + Save */}
@@ -227,116 +219,128 @@ export function SentencesStepClient({ lessonId, videoUrl, segments, initialSaved
         <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-gray-100">
           <div
             className="h-full rounded-full bg-brand-600 transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / segments.length) * 100}%` }}
+            style={{
+              width: `${((currentIndex + 1) / segments.length) * 100}%`,
+            }}
           />
         </div>
 
         {/* English */}
-        <p className="mb-3 text-lg font-medium leading-relaxed text-gray-900">
+        <p className="mb-2 text-lg font-medium leading-relaxed text-gray-900">
           {currentSegment.textEn}
         </p>
 
         {/* Chinese */}
         {showTranslation && currentSegment.textZh && (
-          <p className="mb-3 text-base text-gray-500">{currentSegment.textZh}</p>
+          <p className="mb-4 text-sm text-gray-500">{currentSegment.textZh}</p>
         )}
 
-        {/* Grammar */}
-        {showGrammar && currentSegment.grammarNote && (
-          <div className="mb-4 rounded-lg bg-brand-50 p-3 text-sm leading-relaxed text-brand-800">
-            {currentSegment.grammarNote}
-          </div>
-        )}
-
-        {/* Original Audio */}
-        {(currentSegment.audioUrl || (videoUrl && currentSegment.startTime != null)) && (
-          <div className="mt-6 flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
-            <button
-              onClick={() => playSegmentAudio(currentSegment)}
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-colors ${
-                isPlayingOriginal
-                  ? "bg-orange-500"
-                  : "bg-brand-600 hover:bg-brand-700"
-              }`}
-            >
-              {isPlayingOriginal ? (
-                <Volume2 className="h-3.5 w-3.5" />
-              ) : (
-                <Play className="h-3.5 w-3.5" />
-              )}
-            </button>
-            <span className="text-sm text-gray-500">播放原音</span>
+        {/* Audio row: Play original (left) + Record (right) */}
+        <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3">
+          {/* Play original */}
+          <div className="flex items-center gap-2.5">
+            {hasAudio ? (
+              <button
+                onClick={() => playSegmentAudio(currentSegment)}
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white transition-colors ${
+                  isPlayingOriginal
+                    ? "bg-orange-500"
+                    : "bg-brand-600 hover:bg-brand-700"
+                }`}
+              >
+                {isPlayingOriginal ? (
+                  <Volume2 className="h-4 w-4" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+              </button>
+            ) : (
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-400">
+                <Play className="h-4 w-4" />
+              </div>
+            )}
+            <span className="text-sm text-gray-500">原音</span>
             {currentSegment.audioUrl && (
               <audio ref={originalAudioRef} src={currentSegment.audioUrl} />
             )}
           </div>
+
+          {/* Record */}
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm text-gray-500">
+              {recorder.isRecording
+                ? `${recorder.duration}s`
+                : "跟读"}
+            </span>
+            <button
+              onClick={
+                recorder.isRecording
+                  ? recorder.stopRecording
+                  : recorder.startRecording
+              }
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all ${
+                recorder.isRecording
+                  ? "bg-red-500 text-white animate-pulse"
+                  : "bg-brand-600 text-white hover:bg-brand-700"
+              }`}
+            >
+              {recorder.isRecording ? (
+                <Square className="h-4 w-4" />
+              ) : (
+                <Mic className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Recording playback */}
+        {recorder.audioUrl && !recorder.isRecording && (
+          <div className="mt-3 flex items-center gap-3">
+            <audio src={recorder.audioUrl} controls className="h-9 flex-1" />
+            <button
+              onClick={recorder.resetRecording}
+              className="flex items-center gap-1 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+            >
+              <RotateCcw className="h-3 w-3" />
+              重录
+            </button>
+            {savingRecording && (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" />
+            )}
+            {recordingsSaved.has(currentIndex) && !savingRecording && (
+              <Check className="h-3.5 w-3.5 text-green-600" />
+            )}
+          </div>
         )}
 
-        {/* Recording Controls */}
-        <div className="mt-6 flex flex-col items-center gap-4">
-          {/* Record Button */}
+        {recorder.error && (
+          <p className="mt-2 text-sm text-red-500">{recorder.error}</p>
+        )}
+
+        {/* Grammar Note */}
+        {currentSegment.grammarNote && (
+          <div className="mt-4 rounded-lg bg-brand-50 p-4">
+            <p className="mb-1 text-xs font-semibold text-brand-600">语法解析</p>
+            <p className="text-sm leading-relaxed text-brand-800">
+              {currentSegment.grammarNote}
+            </p>
+          </div>
+        )}
+
+        {/* Translation toggle */}
+        <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-3">
           <button
-            onClick={
-              recorder.isRecording ? recorder.stopRecording : recorder.startRecording
-            }
-            className={`flex h-16 w-16 items-center justify-center rounded-full transition-all ${
-              recorder.isRecording
-                ? "bg-red-500 text-white shadow-lg shadow-red-500/30 animate-pulse"
-                : "bg-brand-600 text-white shadow-lg shadow-brand-600/30 hover:bg-brand-700"
+            onClick={() => setShowTranslation(!showTranslation)}
+            className={`text-xs font-medium transition-colors ${
+              showTranslation ? "text-brand-600" : "text-gray-400"
             }`}
           >
-            {recorder.isRecording ? (
-              <Square className="h-6 w-6" />
-            ) : (
-              <Mic className="h-6 w-6" />
-            )}
+            {showTranslation ? "隐藏翻译" : "显示翻译"}
           </button>
-
-          {recorder.isRecording && (
-            <p className="text-sm font-medium text-red-500">
-              录音中... {recorder.duration}s
-            </p>
-          )}
-
-          {/* Playback + Save */}
-          {recorder.audioUrl && !recorder.isRecording && (
-            <div className="flex flex-col items-center gap-3">
-              <audio src={recorder.audioUrl} controls className="h-10" />
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={recorder.resetRecording}
-                  className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  重录
-                </button>
-                {savingRecording && (
-                  <span className="flex items-center gap-1.5 text-sm text-gray-400">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    保存中
-                  </span>
-                )}
-                {recordingsSaved.has(currentIndex) && !savingRecording && (
-                  <span className="flex items-center gap-1.5 text-sm text-green-600">
-                    <Check className="h-3.5 w-3.5" />
-                    已保存
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {!recorder.isRecording && !recorder.audioUrl && !recorder.error && (
-            <p className="text-sm text-gray-400">点击麦克风按钮开始跟读</p>
-          )}
-
-          {recorder.error && (
-            <p className="text-sm text-red-500">{recorder.error}</p>
-          )}
         </div>
 
         {/* Sentence Navigation */}
-        <div className="mt-8 flex items-center justify-between border-t border-gray-100 pt-4">
+        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
           <button
             disabled={currentIndex === 0}
             onClick={goPrev}
@@ -348,7 +352,9 @@ export function SentencesStepClient({ lessonId, videoUrl, segments, initialSaved
           {currentIndex === segments.length - 1 ? (
             <Link
               href={`/lessons/${lessonId}/expression`}
-              onClick={() => updateProgress({ step: 4, sentencesCompleted: true })}
+              onClick={() =>
+                updateProgress({ step: 4, sentencesCompleted: true })
+              }
               className="flex items-center gap-1 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
             >
               下一步：自由表达
@@ -376,7 +382,9 @@ export function SentencesStepClient({ lessonId, videoUrl, segments, initialSaved
         </Link>
         <Link
           href={`/lessons/${lessonId}/expression`}
-          onClick={() => updateProgress({ step: 4, sentencesCompleted: true })}
+          onClick={() =>
+            updateProgress({ step: 4, sentencesCompleted: true })
+          }
           className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200"
         >
           跳过跟读

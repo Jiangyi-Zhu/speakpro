@@ -102,9 +102,9 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
           </p>
         </div>
 
-        <div className="text-sm leading-loose text-gray-800">
+        <div className="space-y-1 text-sm text-gray-800">
           {segments.map((seg) => (
-            <span key={seg.id}>
+            <p key={seg.id} className="leading-relaxed">
               {seg.textEn.split(/(\s+)/).map((token, i) => {
                 const cleaned = token
                   .replace(/[^a-zA-Z'-]/g, "")
@@ -124,8 +124,8 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
                     {token}
                   </span>
                 );
-              })}{" "}
-            </span>
+              })}
+            </p>
           ))}
         </div>
 
