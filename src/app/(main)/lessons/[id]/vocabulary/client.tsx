@@ -40,8 +40,12 @@ function findWordContext(word: string, segments: Segment[]) {
   return null;
 }
 
+function escapeRegex(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function highlightWord(text: string, word: string) {
-  const regex = new RegExp(`(\\b${word}\\b)`, "gi");
+  const regex = new RegExp(`(\\b${escapeRegex(word)}\\b)`, "gi");
   const parts = text.split(regex);
   return parts.map((part, i) =>
     regex.test(part) ? (
@@ -287,7 +291,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
                     className="mt-3 flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
                   >
                     <Eye className="h-4 w-4" />
-                    查看中文释义
+                    查看中文翻译
                   </button>
                 )}
               </div>

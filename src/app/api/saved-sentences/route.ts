@@ -55,12 +55,10 @@ export async function DELETE(req: NextRequest) {
 
   const { segmentId } = await req.json();
 
-  await prisma.savedSentence.delete({
+  await prisma.savedSentence.deleteMany({
     where: {
-      userId_segmentId: {
-        userId: session.user.id,
-        segmentId,
-      },
+      userId: session.user.id,
+      segmentId,
     },
   });
 
