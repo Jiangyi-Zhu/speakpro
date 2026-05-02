@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import {
   Mic,
@@ -16,6 +16,8 @@ import {
   Save,
   Check,
   Loader2,
+  Play,
+  ArrowRight,
 } from "lucide-react";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { useProgress } from "@/hooks/use-progress";
@@ -45,10 +47,10 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
   const [savingSentence, setSavingSentence] = useState(false);
   const [recordingsSaved, setRecordingsSaved] = useState<Set<number>>(new Set());
   const [savingRecording, setSavingRecording] = useState(false);
-  const [allCompleted, setAllCompleted] = useState(false);
 
   const recorder = useAudioRecorder();
   const { updateProgress } = useProgress(lessonId);
+  const originalAudioRef = useRef<HTMLAudioElement>(null);
 
   const currentSegment = segments[currentIndex];
 
@@ -115,9 +117,6 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
       setCurrentIndex(currentIndex + 1);
       if (recorder.isRecording) recorder.stopRecording();
       recorder.resetRecording();
-    } else {
-      updateProgress({ step: 3, sentencesCompleted: true });
-      setAllCompleted(true);
     }
   }
 
@@ -208,8 +207,22 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
           </div>
         )}
 
+        {/* Original Audio */}
+        {currentSegment.audioUrl && (
+          <div className="mt-6 flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
+            <button
+              onClick={() => originalAudioRef.current?.play()}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <Play className="h-3.5 w-3.5" />
+            </button>
+            <span className="text-sm text-gray-500">播放原音</span>
+            <audio ref={originalAudioRef} src={currentSegment.audioUrl} />
+          </div>
+        )}
+
         {/* Recording Controls */}
-        <div className="mt-8 flex flex-col items-center gap-4">
+        <div className="mt-6 flex flex-col items-center gap-4">
           {/* Record Button */}
           <button
             onClick={
@@ -289,32 +302,24 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
             <ChevronLeft className="h-4 w-4" />
             上一句
           </button>
-          <button
-            onClick={goNext}
-            disabled={allCompleted && currentIndex === segments.length - 1}
-            className={`flex items-center gap-1 rounded-lg px-3 py-2 text-sm ${
-              allCompleted && currentIndex === segments.length - 1
-                ? "bg-green-50 text-green-700"
-                : "text-blue-600 hover:bg-blue-50"
-            }`}
-          >
-            {allCompleted && currentIndex === segments.length - 1 ? (
-              <>
-                <Check className="h-4 w-4" />
-                跟读完成
-              </>
-            ) : currentIndex === segments.length - 1 ? (
-              <>
-                完成跟读
-                <ChevronRight className="h-4 w-4" />
-              </>
-            ) : (
-              <>
-                下一句
-                <ChevronRight className="h-4 w-4" />
-              </>
-            )}
-          </button>
+          {currentIndex === segments.length - 1 ? (
+            <Link
+              href={`/lessons/${lessonId}/expression`}
+              onClick={() => updateProgress({ step: 3, sentencesCompleted: true })}
+              className="flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              下一步：自由表达
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <button
+              onClick={goNext}
+              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-blue-600 hover:bg-blue-50"
+            >
+              下一句
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -329,9 +334,10 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
         <Link
           href={`/lessons/${lessonId}/expression`}
           onClick={() => updateProgress({ step: 3, sentencesCompleted: true })}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-5 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200"
         >
-          下一步：自由表达
+          跳过跟读
+          <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </div>

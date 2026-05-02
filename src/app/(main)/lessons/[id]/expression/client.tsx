@@ -290,7 +290,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
         </Link>
         <Link
           href={`/lessons/${lessonId}/summary`}
-          onClick={() => updateProgress({ step: 4, expressionDone: true })}
+          onClick={() => updateProgress({ step: 4, expressionDone: submitted.size > 0 })}
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
         >
           下一步：学习总结
