@@ -15,6 +15,14 @@ const iconMap = {
   Award,
 };
 
+const shortLabels: Record<string, string> = {
+  video: "视频",
+  vocabulary: "词汇",
+  sentences: "跟读",
+  expression: "表达",
+  summary: "总结",
+};
+
 interface StepNavProps {
   lessonId: string;
   completedSteps?: Record<string, boolean>;
@@ -51,7 +59,7 @@ export function StepNav({ lessonId, completedSteps = {} }: StepNavProps) {
               <Icon className="h-4 w-4" />
             )}
             <span className="hidden sm:inline">{step.label}</span>
-            <span className="sm:hidden">Step {i + 1}</span>
+            <span className="sm:hidden">{shortLabels[step.key]}</span>
           </Link>
         );
       })}

@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { StepNav } from "@/components/lesson/step-nav";
@@ -50,6 +52,13 @@ export default async function LessonLayout({
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-4">
+        <Link
+          href="/lessons"
+          className="mb-2 inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          课程列表
+        </Link>
         <h1 className="text-xl font-bold text-gray-900">{lesson.title}</h1>
       </div>
       <div className="mb-6">
