@@ -2,7 +2,17 @@
 
 import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { BookOpen, Check, X, Loader2 } from "lucide-react";
+import {
+  BookOpen,
+  Check,
+  X,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { useProgress } from "@/hooks/use-progress";
 
 interface Segment {
@@ -21,9 +31,36 @@ interface Props {
   segments: Segment[];
 }
 
+function findWordContext(word: string, segments: Segment[]) {
+  for (const seg of segments) {
+    const lower = seg.textEn.toLowerCase();
+    if (lower.includes(word.toLowerCase())) {
+      return seg;
+    }
+  }
+  return null;
+}
+
+function highlightWord(text: string, word: string) {
+  const regex = new RegExp(`(\\b${word}\\b)`, "gi");
+  const parts = text.split(regex);
+  return parts.map((part, i) =>
+    regex.test(part) ? (
+      <span key={i} className="rounded bg-yellow-200 px-0.5 font-semibold text-yellow-900">
+        {part}
+      </span>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
+
 export function VocabularyStepClient({ lessonId, segments }: Props) {
   const [savedWords, setSavedWords] = useState<Map<string, SavedWord>>(new Map());
   const [showTranslation, setShowTranslation] = useState(true);
+  const [phase, setPhase] = useState<"mark" | "learn">("mark");
+  const [learnIndex, setLearnIndex] = useState(0);
+  const [showMeaning, setShowMeaning] = useState(false);
   const { updateProgress } = useProgress(lessonId);
   const markedRef = useRef(false);
 
@@ -78,110 +115,240 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
   );
 
   const wordList = Array.from(savedWords.values());
+  const currentWord = wordList[learnIndex];
+  const currentContext = currentWord ? findWordContext(currentWord.word, segments) : null;
 
-  return (
-    <div className="space-y-6">
-      {/* Article */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">文章内容</h2>
-          <button
-            onClick={() => setShowTranslation(!showTranslation)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium ${
-              showTranslation ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-500"
-            }`}
-          >
-            {showTranslation ? "隐藏翻译" : "显示翻译"}
-          </button>
-        </div>
+  function startLearning() {
+    if (wordList.length === 0) return;
+    setPhase("learn");
+    setLearnIndex(0);
+    setShowMeaning(false);
+  }
 
-        <div className="space-y-4">
-          {segments.map((seg) => (
-            <div key={seg.id} className="rounded-lg p-3 hover:bg-gray-50">
-              <p className="text-sm leading-relaxed text-gray-800">
-                {seg.textEn.split(/(\s+)/).map((token, i) => {
-                  const cleaned = token.replace(/[^a-zA-Z'-]/g, "").toLowerCase();
-                  const isMarked = savedWords.has(cleaned);
-                  if (!token.trim()) return token;
-                  return (
-                    <span
-                      key={i}
-                      onClick={() => handleWordClick(token)}
-                      className={`cursor-pointer rounded px-0.5 transition-colors ${
-                        isMarked
-                          ? "bg-yellow-200 text-yellow-900"
-                          : "hover:bg-blue-100"
-                      }`}
-                    >
-                      {token}
-                    </span>
-                  );
-                })}
-              </p>
-              {showTranslation && seg.textZh && (
-                <p className="mt-1 text-sm text-gray-500">{seg.textZh}</p>
-              )}
-            </div>
-          ))}
-        </div>
+  function nextCard() {
+    setShowMeaning(false);
+    if (learnIndex < wordList.length - 1) {
+      setLearnIndex(learnIndex + 1);
+    }
+  }
 
-        <p className="mt-4 text-xs text-gray-400">
-          点击单词自动收录到生词本，再点取消
-        </p>
-      </div>
+  function prevCard() {
+    setShowMeaning(false);
+    if (learnIndex > 0) {
+      setLearnIndex(learnIndex - 1);
+    }
+  }
 
-      {/* Word List */}
-      {wordList.length > 0 && (
+  // Phase 1: Mark words
+  if (phase === "mark") {
+    return (
+      <div className="space-y-6">
         <div className="rounded-xl border border-gray-200 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-gray-900">已收录生词</h2>
-            <span className="text-sm text-gray-400">{wordList.length} 个</span>
+            <h2 className="text-base font-semibold text-gray-900">阅读文章，点击标记生词</h2>
+            <button
+              onClick={() => setShowTranslation(!showTranslation)}
+              className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium ${
+                showTranslation ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-500"
+              }`}
+            >
+              {showTranslation ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+              翻译
+            </button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {wordList.map((w) => (
-              <span
-                key={w.word}
-                className="inline-flex items-center gap-1.5 rounded-full bg-yellow-50 px-3 py-1.5 text-sm font-medium text-yellow-800"
-              >
-                {w.status === "saving" ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : w.status === "saved" ? (
-                  <Check className="h-3 w-3 text-green-600" />
-                ) : null}
-                {w.word}
-                <button
-                  onClick={() => handleWordClick(w.word)}
-                  className="ml-0.5 rounded-full p-0.5 hover:bg-yellow-200"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
+          <div className="space-y-4">
+            {segments.map((seg) => (
+              <div key={seg.id} className="rounded-lg p-3 hover:bg-gray-50">
+                <p className="text-sm leading-relaxed text-gray-800">
+                  {seg.textEn.split(/(\s+)/).map((token, i) => {
+                    const cleaned = token.replace(/[^a-zA-Z'-]/g, "").toLowerCase();
+                    const isMarked = savedWords.has(cleaned);
+                    if (!token.trim()) return token;
+                    return (
+                      <span
+                        key={i}
+                        onClick={() => handleWordClick(token)}
+                        className={`cursor-pointer rounded px-0.5 transition-colors ${
+                          isMarked
+                            ? "bg-yellow-200 text-yellow-900"
+                            : "hover:bg-blue-100"
+                        }`}
+                      >
+                        {token}
+                      </span>
+                    );
+                  })}
+                </p>
+                {showTranslation && seg.textZh && (
+                  <p className="mt-1 text-sm text-gray-500">{seg.textZh}</p>
+                )}
+              </div>
             ))}
           </div>
-        </div>
-      )}
 
-      {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <Link
-          href={`/lessons/${lessonId}/video`}
-          className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          上一步
-        </Link>
-        <Link
-          href={`/lessons/${lessonId}/sentences`}
-          onClick={() => {
-            if (!markedRef.current) {
-              markedRef.current = true;
-              updateProgress({ step: 2, vocabCompleted: true });
-            }
-          }}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-        >
-          下一步：句子跟读
-        </Link>
+          {wordList.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2 border-t border-gray-100 pt-4">
+              {wordList.map((w) => (
+                <span
+                  key={w.word}
+                  className="inline-flex items-center gap-1 rounded-full bg-yellow-50 px-3 py-1 text-sm font-medium text-yellow-800"
+                >
+                  {w.status === "saving" && <Loader2 className="h-3 w-3 animate-spin" />}
+                  {w.status === "saved" && <Check className="h-3 w-3 text-green-600" />}
+                  {w.word}
+                  <button
+                    onClick={() => handleWordClick(w.word)}
+                    className="ml-0.5 rounded-full p-0.5 hover:bg-yellow-200"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex items-center justify-between">
+          <Link
+            href={`/lessons/${lessonId}/video`}
+            className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            上一步
+          </Link>
+          {wordList.length > 0 ? (
+            <button
+              onClick={startLearning}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              开始学习生词 ({wordList.length})
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : (
+            <Link
+              href={`/lessons/${lessonId}/sentences`}
+              onClick={() => {
+                if (!markedRef.current) {
+                  markedRef.current = true;
+                  updateProgress({ step: 2, vocabCompleted: true });
+                }
+              }}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              没有生词，下一步
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Phase 2: Learn words (flashcard style)
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl border border-gray-200 bg-white p-6">
+        {/* Progress */}
+        <div className="mb-2 flex items-center justify-between text-sm text-gray-400">
+          <span className="flex items-center gap-1.5">
+            <BookOpen className="h-4 w-4" />
+            学习生词 {learnIndex + 1} / {wordList.length}
+          </span>
+          <button
+            onClick={() => setPhase("mark")}
+            className="text-xs text-gray-400 hover:text-gray-600"
+          >
+            返回标记
+          </button>
+        </div>
+        <div className="mb-6 h-1.5 overflow-hidden rounded-full bg-gray-100">
+          <div
+            className="h-full rounded-full bg-blue-600 transition-all duration-300"
+            style={{ width: `${((learnIndex + 1) / wordList.length) * 100}%` }}
+          />
+        </div>
+
+        {/* Flashcard */}
+        {currentWord && (
+          <div className="py-4">
+            {/* Word */}
+            <div className="mb-6 text-center">
+              <h2 className="text-3xl font-bold text-gray-900">{currentWord.word}</h2>
+            </div>
+
+            {/* Context sentence */}
+            {currentContext && (
+              <div
+                className={`rounded-xl p-5 transition-all ${
+                  showMeaning ? "bg-blue-50" : "bg-gray-50"
+                }`}
+              >
+                <p className="mb-1 text-xs font-medium text-gray-400">原文语境</p>
+                <p className="text-base leading-relaxed text-gray-800">
+                  {highlightWord(currentContext.textEn, currentWord.word)}
+                </p>
+
+                {showMeaning ? (
+                  <div className="mt-3 border-t border-blue-200 pt-3">
+                    <p className="text-sm leading-relaxed text-blue-800">
+                      {currentContext.textZh}
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowMeaning(true)}
+                    className="mt-3 flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+                  >
+                    <Eye className="h-4 w-4" />
+                    查看中文释义
+                  </button>
+                )}
+              </div>
+            )}
+
+            {!currentContext && (
+              <div className="rounded-xl bg-gray-50 p-5 text-center text-sm text-gray-500">
+                该单词未在课文中找到上下文
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Card Navigation */}
+        <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
+          <button
+            disabled={learnIndex === 0}
+            onClick={prevCard}
+            className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 disabled:opacity-30"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            上一个
+          </button>
+          {learnIndex === wordList.length - 1 ? (
+            <Link
+              href={`/lessons/${lessonId}/sentences`}
+              onClick={() => {
+                if (!markedRef.current) {
+                  markedRef.current = true;
+                  updateProgress({ step: 2, vocabCompleted: true });
+                }
+              }}
+              className="flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              学完了，下一步
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : (
+            <button
+              onClick={nextCard}
+              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-blue-600 hover:bg-blue-50"
+            >
+              下一个
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
