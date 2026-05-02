@@ -31,6 +31,8 @@ export default async function SentencesStepPage({
     textZh: s.textZh || "",
     grammarNote: s.grammarNote || "",
     audioUrl: s.audioUrl,
+    startTime: s.startTime,
+    endTime: s.endTime,
   }));
 
   let savedSegmentIds: string[] = [];
@@ -50,6 +52,7 @@ export default async function SentencesStepPage({
   return (
     <SentencesStepClient
       lessonId={id}
+      videoUrl={lesson.videoUrl}
       segments={segments}
       initialSavedSegmentIds={savedSegmentIds}
     />

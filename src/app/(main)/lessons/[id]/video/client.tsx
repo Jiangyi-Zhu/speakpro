@@ -54,6 +54,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
   const [currentLoopN, setCurrentLoopN] = useState(0);
   const [activeSegIndex, setActiveSegIndex] = useState(-1);
   const [groupSize, setGroupSize] = useState(1);
+  const [playbackRate, setPlaybackRate] = useState(1);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const transcriptRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -219,6 +220,15 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
     else v.pause();
   }
 
+  const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+
+  function cycleSpeed() {
+    const nextIdx = (SPEEDS.indexOf(playbackRate) + 1) % SPEEDS.length;
+    const rate = SPEEDS[nextIdx];
+    setPlaybackRate(rate);
+    if (videoRef.current) videoRef.current.playbackRate = rate;
+  }
+
   function cycleLoopMode() {
     setCurrentLoopN(0);
     if (loopMode === "none") setLoopMode("single");
@@ -278,6 +288,17 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
             {isPlaying ? "暂停" : "播放"}
           </button>
         )}
+
+        <button
+          onClick={cycleSpeed}
+          className={`rounded-lg px-3 py-2 text-sm font-bold tabular-nums transition-colors ${
+            playbackRate !== 1
+              ? "bg-brand-50 text-brand-700"
+              : "bg-gray-100 text-gray-500"
+          }`}
+        >
+          {playbackRate}x
+        </button>
 
         <button
           onClick={cycleLoopMode}

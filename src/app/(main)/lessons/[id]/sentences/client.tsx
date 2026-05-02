@@ -29,15 +29,18 @@ interface Segment {
   textZh: string;
   grammarNote: string;
   audioUrl: string | null;
+  startTime: number | null;
+  endTime: number | null;
 }
 
 interface Props {
   lessonId: string;
+  videoUrl: string | null;
   segments: Segment[];
   initialSavedSegmentIds?: string[];
 }
 
-export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds = [] }: Props) {
+export function SentencesStepClient({ lessonId, videoUrl, segments, initialSavedSegmentIds = [] }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(true);
   const [showGrammar, setShowGrammar] = useState(false);
@@ -48,22 +51,35 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
   const [recordingsSaved, setRecordingsSaved] = useState<Set<number>>(new Set());
   const [savingRecording, setSavingRecording] = useState(false);
 
-  const [ttsPlaying, setTtsPlaying] = useState(false);
+  const [isPlayingOriginal, setIsPlayingOriginal] = useState(false);
 
   const recorder = useAudioRecorder();
   const { updateProgress } = useProgress(lessonId);
   const originalAudioRef = useRef<HTMLAudioElement>(null);
+  const videoAudioRef = useRef<HTMLAudioElement | null>(null);
+  const stopTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  function speakText(text: string) {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    utterance.rate = 0.9;
-    setTtsPlaying(true);
-    utterance.onend = () => setTtsPlaying(false);
-    utterance.onerror = () => setTtsPlaying(false);
-    window.speechSynthesis.speak(utterance);
+  function playSegmentAudio(seg: Segment) {
+    if (seg.audioUrl) {
+      originalAudioRef.current?.play();
+      return;
+    }
+    if (!videoUrl || seg.startTime == null || seg.endTime == null) return;
+
+    if (!videoAudioRef.current || videoAudioRef.current.src !== videoUrl) {
+      videoAudioRef.current = new Audio(videoUrl);
+    }
+    const audio = videoAudioRef.current;
+    clearTimeout(stopTimerRef.current);
+    audio.currentTime = seg.startTime;
+    setIsPlayingOriginal(true);
+    audio.play().catch(() => {});
+
+    const duration = (seg.endTime - seg.startTime) * 1000;
+    stopTimerRef.current = setTimeout(() => {
+      audio.pause();
+      setIsPlayingOriginal(false);
+    }, duration);
   }
 
   const currentSegment = segments[currentIndex];
@@ -129,9 +145,16 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
     }
   }, [recorder.audioBlob, recorder.isRecording]);
 
+  function stopOriginalAudio() {
+    clearTimeout(stopTimerRef.current);
+    videoAudioRef.current?.pause();
+    setIsPlayingOriginal(false);
+  }
+
   function goNext() {
     if (currentIndex < segments.length - 1) {
       setCurrentIndex(currentIndex + 1);
+      stopOriginalAudio();
       if (recorder.isRecording) recorder.stopRecording();
       recorder.resetRecording();
     }
@@ -140,6 +163,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
   function goPrev() {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
+      stopOriginalAudio();
       if (recorder.isRecording) recorder.stopRecording();
       recorder.resetRecording();
     }
@@ -225,32 +249,28 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
         )}
 
         {/* Original Audio */}
-        <div className="mt-6 flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
-          <button
-            onClick={() => {
-              if (currentSegment.audioUrl) {
-                originalAudioRef.current?.play();
-              } else {
-                speakText(currentSegment.textEn);
-              }
-            }}
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-colors ${
-              ttsPlaying && !currentSegment.audioUrl
-                ? "bg-orange-500"
-                : "bg-brand-600 hover:bg-brand-700"
-            }`}
-          >
-            {ttsPlaying && !currentSegment.audioUrl ? (
-              <Volume2 className="h-3.5 w-3.5" />
-            ) : (
-              <Play className="h-3.5 w-3.5" />
+        {(currentSegment.audioUrl || (videoUrl && currentSegment.startTime != null)) && (
+          <div className="mt-6 flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
+            <button
+              onClick={() => playSegmentAudio(currentSegment)}
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-colors ${
+                isPlayingOriginal
+                  ? "bg-orange-500"
+                  : "bg-brand-600 hover:bg-brand-700"
+              }`}
+            >
+              {isPlayingOriginal ? (
+                <Volume2 className="h-3.5 w-3.5" />
+              ) : (
+                <Play className="h-3.5 w-3.5" />
+              )}
+            </button>
+            <span className="text-sm text-gray-500">播放原音</span>
+            {currentSegment.audioUrl && (
+              <audio ref={originalAudioRef} src={currentSegment.audioUrl} />
             )}
-          </button>
-          <span className="text-sm text-gray-500">播放原音</span>
-          {currentSegment.audioUrl && (
-            <audio ref={originalAudioRef} src={currentSegment.audioUrl} />
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Recording Controls */}
         <div className="mt-6 flex flex-col items-center gap-4">
