@@ -9,6 +9,7 @@ const protectedPaths = [
   "/recordings",
   "/expressions",
   "/achievements",
+  "/lessons/",
 ];
 const adminPaths = ["/admin"];
 const authPaths = ["/login", "/register"];

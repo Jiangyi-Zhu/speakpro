@@ -15,9 +15,12 @@ const difficultyColor: Record<string, string> = {
   ADVANCED: "bg-orange-100 text-orange-700",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function LessonsPage() {
   let lessons: Awaited<ReturnType<typeof prisma.lesson.findMany>> = [];
   let completedLessonIds = new Set<string>();
+  let isLoggedIn = false;
 
   try {
     lessons = await prisma.lesson.findMany({
@@ -26,6 +29,7 @@ export default async function LessonsPage() {
     });
 
     const session = await auth();
+    isLoggedIn = !!session?.user;
     if (session?.user?.id) {
       const progress = await prisma.userProgress.findMany({
         where: { userId: session.user.id, completed: true },
@@ -45,6 +49,18 @@ export default async function LessonsPage() {
           选择一个课程开始你的英语学习之旅
         </p>
       </div>
+
+      {!isLoggedIn && (
+        <div className="mb-6 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 p-4">
+          <p className="text-sm text-blue-800">登录后可保存学习进度、生词和录音</p>
+          <Link
+            href="/login"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            登录
+          </Link>
+        </div>
+      )}
 
       {lessons.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">

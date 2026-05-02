@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BookOpen, Play, Mic, MessageSquare, Award, ArrowRight } from "lucide-react";
+import { BookOpen, Play, Mic, MessageSquare, Award, ArrowRight, LogIn } from "lucide-react";
+import { auth } from "@/lib/auth";
 
 const steps = [
   {
@@ -29,9 +30,38 @@ const steps = [
   },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await auth();
+  const isLoggedIn = !!session?.user;
+
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Top Nav */}
+      <header className="absolute left-0 right-0 top-0 z-10 px-4 py-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <div className="flex items-center gap-2 text-white">
+            <BookOpen className="h-6 w-6" />
+            <span className="text-lg font-bold">SpeakPro</span>
+          </div>
+          {isLoggedIn ? (
+            <Link
+              href="/dashboard"
+              className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/20"
+            >
+              进入学习中心
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm hover:bg-white/20"
+            >
+              <LogIn className="h-4 w-4" />
+              登录
+            </Link>
+          )}
+        </div>
+      </header>
+
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 px-4 py-24 text-white sm:py-32">
         <div className="mx-auto max-w-4xl text-center">
@@ -48,19 +78,31 @@ export default function LandingPage() {
             科学的五步学习法，从视频观看到口语表达，帮你系统提升职场英语交流能力
           </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/lessons"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-blue-700 shadow-lg transition-all hover:bg-blue-50 hover:shadow-xl"
-            >
-              开始学习
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-white/10"
-            >
-              免费注册
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-blue-700 shadow-lg transition-all hover:bg-blue-50 hover:shadow-xl"
+              >
+                进入学习中心
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-blue-700 shadow-lg transition-all hover:bg-blue-50 hover:shadow-xl"
+                >
+                  免费注册
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/30 px-8 py-3.5 text-base font-semibold text-white transition-all hover:bg-white/10"
+                >
+                  已有账号，登录
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>

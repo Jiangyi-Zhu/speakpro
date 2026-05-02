@@ -45,6 +45,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
   const [savingSentence, setSavingSentence] = useState(false);
   const [recordingsSaved, setRecordingsSaved] = useState<Set<number>>(new Set());
   const [savingRecording, setSavingRecording] = useState(false);
+  const [allCompleted, setAllCompleted] = useState(false);
 
   const recorder = useAudioRecorder();
   const { updateProgress } = useProgress(lessonId);
@@ -116,6 +117,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
       recorder.resetRecording();
     } else {
       updateProgress({ step: 3, sentencesCompleted: true });
+      setAllCompleted(true);
     }
   }
 
@@ -289,10 +291,29 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
           </button>
           <button
             onClick={goNext}
-            className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-blue-600 hover:bg-blue-50"
+            disabled={allCompleted && currentIndex === segments.length - 1}
+            className={`flex items-center gap-1 rounded-lg px-3 py-2 text-sm ${
+              allCompleted && currentIndex === segments.length - 1
+                ? "bg-green-50 text-green-700"
+                : "text-blue-600 hover:bg-blue-50"
+            }`}
           >
-            {currentIndex === segments.length - 1 ? "完成跟读" : "下一句"}
-            <ChevronRight className="h-4 w-4" />
+            {allCompleted && currentIndex === segments.length - 1 ? (
+              <>
+                <Check className="h-4 w-4" />
+                跟读完成
+              </>
+            ) : currentIndex === segments.length - 1 ? (
+              <>
+                完成跟读
+                <ChevronRight className="h-4 w-4" />
+              </>
+            ) : (
+              <>
+                下一句
+                <ChevronRight className="h-4 w-4" />
+              </>
+            )}
           </button>
         </div>
       </div>

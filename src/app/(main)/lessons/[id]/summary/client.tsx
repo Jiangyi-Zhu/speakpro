@@ -7,13 +7,12 @@ import {
   Mic,
   MessageSquare,
   Share2,
-  Download,
   ArrowRight,
   Check,
   X,
 } from "lucide-react";
 import { useProgress } from "@/hooks/use-progress";
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 
 interface Props {
   lessonId: string;
@@ -35,14 +34,13 @@ export function SummaryStepClient({
   expressionDone,
 }: Props) {
   const { updateProgress } = useProgress(lessonId);
-  const tracked = useRef(false);
+  const [completed, setCompleted] = useState(false);
 
-  useEffect(() => {
-    if (!tracked.current) {
-      tracked.current = true;
-      updateProgress({ step: 5, summaryGenerated: true, completed: true });
-    }
-  }, [updateProgress]);
+  function handleComplete() {
+    if (completed) return;
+    setCompleted(true);
+    updateProgress({ step: 5, summaryGenerated: true, completed: true });
+  }
 
   const stats = [
     {
@@ -122,9 +120,26 @@ export function SummaryStepClient({
 
         {/* Actions */}
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
-            <Download className="h-4 w-4" />
-            保存卡片
+          <button
+            onClick={handleComplete}
+            disabled={completed}
+            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
+              completed
+                ? "bg-green-100 text-green-700"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            {completed ? (
+              <>
+                <Check className="h-4 w-4" />
+                已完成本课
+              </>
+            ) : (
+              <>
+                <Award className="h-4 w-4" />
+                标记本课完成
+              </>
+            )}
           </button>
           <button className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
             <Share2 className="h-4 w-4" />

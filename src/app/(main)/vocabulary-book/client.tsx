@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Search, Check, X, Loader2 } from "lucide-react";
+import { BookOpen, Search, Check, Circle, Loader2 } from "lucide-react";
 
 interface Word {
   id: string;
@@ -144,7 +144,7 @@ export function VocabularyBookClient({ initialWords }: Props) {
                   ) : word.mastered ? (
                     <Check className="h-4 w-4" />
                   ) : (
-                    <X className="h-4 w-4" />
+                    <Circle className="h-4 w-4" />
                   )}
                 </button>
               </div>

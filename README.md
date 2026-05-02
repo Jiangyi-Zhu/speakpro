@@ -139,65 +139,38 @@ npx prisma db push
 npm run dev
 ```
 
-## 部署上线（Vercel + Neon）
+## 线上环境
 
-### 第 1 步：创建 Neon 数据库（免费）
+- **网站地址**: https://speakpro-livid.vercel.app
+- **GitHub 仓库**: https://github.com/Jiangyi-Zhu/speakpro
+- **数据库**: Neon PostgreSQL (us-east-1)
+- **Vercel 控制台**: https://vercel.com/jiangyi-zhus-projects/speakpro
 
-1. 打开 https://neon.tech ，用 GitHub 登录
-2. 创建 project（如 `speakpro`），region 选 **Singapore** 或最近的节点
-3. 创建完成后复制 **Connection string**，格式类似：
-   ```
-   postgresql://neondb_owner:xxxx@ep-xxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-   ```
+### 测试账号
 
-### 第 2 步：推送数据库结构 + 种子数据
+| 角色 | 邮箱 | 密码 |
+|------|------|------|
+| 管理员 | `admin@speakpro.com` | `admin123` |
+| 演示用户 | `demo@speakpro.com` | `demo1234` |
 
-```bash
-DATABASE_URL="<你的连接字符串>" npx prisma db push
-DATABASE_URL="<你的连接字符串>" npx tsx prisma/seed.ts
-```
+### 更新部署流程
 
-种子数据包含：
-- 管理员账号：`admin@speakpro.com` / `admin123`
-- 演示账号：`demo@speakpro.com` / `demo1234`
-- 3 个示例课程 + 4 个表达问题 + 8 个成就
-
-### 第 3 步：创建 GitHub 仓库并推送
-
-1. 去 https://github.com/new 创建 **Private** 仓库（如 `speakpro`）
-2. 推送代码：
+本地改完代码后，3 步更新线上：
 
 ```bash
 git add -A
-git commit -m "Initial commit: SpeakPro 职场英语口语训练平台"
-git remote add origin https://github.com/<你的用户名>/speakpro.git
-git push -u origin main
+git commit -m "描述你改了什么"
+git push
 ```
 
-### 第 4 步：Vercel 部署
+push 到 GitHub 后，Vercel 自动构建部署，1-2 分钟网站就更新了。
 
-1. 打开 https://vercel.com ，用 GitHub 登录
-2. 点 **Import Project** → 选 `speakpro` 仓库
-3. 在 **Environment Variables** 中添加：
+### Vercel 环境变量
 
-| 变量名 | 值 | 说明 |
-|--------|-----|------|
-| `DATABASE_URL` | Neon 连接字符串 | 第 1 步获取的 |
-| `NEXTAUTH_SECRET` | `openssl rand -base64 32` | 终端运行生成 |
-| `NEXTAUTH_URL` | `https://speakpro-xxx.vercel.app` | 部署后填 Vercel 分配的域名 |
+在 Vercel 控制台 Settings → Environment Variables 中配置：
 
-4. 点 **Deploy**，等 1-2 分钟即可上线
-
-### 部署后验证
-
-- 访问 Vercel 分配的域名，确认首页加载正常
-- 用 `demo@speakpro.com` / `demo1234` 登录测试学习流程
-- 用 `admin@speakpro.com` / `admin123` 登录进入 `/admin` 管理后台
-
-### 自定义域名（可选）
-
-在 Vercel 项目 Settings → Domains 中添加自己的域名，并在 DNS 添加 CNAME 记录指向 `cname.vercel-dns.com`。添加后记得更新 `NEXTAUTH_URL` 环境变量。
-
-## 待定事项
-
-搭建完框架后统一确认的事项，见 `DEVELOPMENT_PLAN.md` 的「待定决策」章节。
+| 变量名 | 说明 |
+|--------|------|
+| `DATABASE_URL` | Neon PostgreSQL 连接字符串 |
+| `NEXTAUTH_SECRET` | 认证加密密钥 |
+| `NEXTAUTH_URL` | `https://speakpro-livid.vercel.app` |
