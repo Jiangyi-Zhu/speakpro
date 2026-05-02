@@ -145,7 +145,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
   if (phase === "mark") {
     return (
       <div className="space-y-6">
-        <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6">
+        <div className="rounded-2xl bg-white shadow-sm p-6">
           <div className="mb-4">
             <h2 className="text-base font-semibold text-gray-900">阅读文章，点击标记生词</h2>
           </div>
@@ -203,14 +203,14 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
         <div className="flex items-center justify-between">
           <Link
             href={`/lessons/${lessonId}/video`}
-            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-xl bg-white px-5 py-2.5 text-sm font-medium text-gray-600 shadow-[0_2px_0_0_#E5E7EB] transition-all hover:bg-gray-50 active:translate-y-0.5 active:shadow-none"
           >
             上一步
           </Link>
           {wordList.length > 0 ? (
             <button
               onClick={startLearning}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+              className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
             >
               开始学习生词 ({wordList.length})
               <ArrowRight className="h-4 w-4" />
@@ -224,7 +224,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
                   updateProgress({ step: 2, vocabCompleted: true });
                 }
               }}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+              className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
             >
               没有生词，下一步
               <ArrowRight className="h-4 w-4" />
@@ -238,7 +238,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
   // Phase 2: Learn words (flashcard style)
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6">
+      <div className="rounded-2xl bg-white shadow-sm p-6">
         {/* Progress */}
         <div className="mb-2 flex items-center justify-between text-sm text-gray-400">
           <span className="flex items-center gap-1.5">
@@ -324,7 +324,7 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
                   updateProgress({ step: 2, vocabCompleted: true });
                 }
               }}
-              className="flex items-center gap-1 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+              className="flex items-center gap-1 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
             >
               学完了，下一步
               <ArrowRight className="h-4 w-4" />

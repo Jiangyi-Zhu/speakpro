@@ -14,8 +14,6 @@ export default async function DashboardPage() {
     step: number;
     completed: boolean;
   }> = [];
-  let recentAchievements: Array<{ icon: string; description: string }> = [];
-  let achievementProgress = { unlocked: 0, total: 0 };
 
   if (session?.user?.id) {
     try {
@@ -53,33 +51,10 @@ export default async function DashboardPage() {
         step: p.step,
         completed: p.completed,
       }));
-
-      const totalAchievements = await prisma.achievement.count();
-      const unlockedCount = await prisma.userAchievement.count({
-        where: { userId: session.user.id },
-      });
-      const recentUA = await prisma.userAchievement.findMany({
-        where: { userId: session.user.id },
-        include: { achievement: { select: { icon: true, description: true } } },
-        orderBy: { unlockedAt: "desc" },
-        take: 4,
-      });
-      achievementProgress = { unlocked: unlockedCount, total: totalAchievements };
-      recentAchievements = recentUA.map((ua) => ({
-        icon: ua.achievement.icon,
-        description: ua.achievement.description,
-      }));
     } catch {
       // DB not connected or user not found
     }
   }
-
-  const statItems = [
-    { icon: Flame, label: "连续打卡", value: `${stats.streak} 天`, color: "text-orange-500 bg-orange-50" },
-    { icon: Clock, label: "学习时长", value: `${stats.totalMinutes} 分钟`, color: "text-blue-500 bg-blue-50" },
-    { icon: BookOpen, label: "完成课程", value: `${stats.lessonsCompleted} 课`, color: "text-green-500 bg-green-50" },
-    { icon: Award, label: "掌握词汇", value: `${stats.wordsLearned} 词`, color: "text-purple-500 bg-purple-50" },
-  ];
 
   const stepLabels: Record<number, string> = {
     1: "视频学习",
@@ -98,129 +73,122 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {session?.user?.name ? `${session.user.name}，欢迎回来` : "学习中心"}
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      {/* Greeting */}
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          {session?.user?.name ? `${session.user.name}，` : ""}欢迎回来
         </h1>
-        <p className="mt-1 text-sm text-gray-500">每天进步一点点</p>
-      </div>
-
-      {/* Stats */}
-      <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {statItems.map((stat) => (
-          <div key={stat.label} className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-5">
-            <div className={`mb-3 inline-flex rounded-lg p-2 ${stat.color}`}>
-              <stat.icon className="h-5 w-5" />
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          {stats.streak > 0 && (
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3.5 py-1.5 text-sm font-semibold text-orange-600">
+              <Flame className="h-4 w-4" />
+              {stats.streak} 天连续
             </div>
-            <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-            <div className="text-sm text-gray-500">{stat.label}</div>
-          </div>
-        ))}
+          )}
+          <span className="text-sm text-gray-400">
+            {stats.totalMinutes > 0
+              ? `累计学习 ${stats.totalMinutes} 分钟`
+              : "开始你的第一课吧"}
+          </span>
+        </div>
       </div>
 
       {/* Continue Learning */}
-      <div className="mb-10">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {recentLessons.length > 0 ? "继续学习" : "开始学习"}
-          </h2>
+      {recentLessons.length > 0 ? (
+        <div className="mb-8">
           <Link
-            href="/lessons"
-            className="flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
+            href={`/lessons/${recentLessons[0].id}/${stepPaths[recentLessons[0].step] || "video"}`}
+            className="group block rounded-2xl bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
           >
-            全部课程
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        {recentLessons.length === 0 ? (
-          <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-8 text-center">
-            <BookOpen className="mx-auto mb-3 h-10 w-10 text-gray-300" />
-            <p className="mb-4 text-sm text-gray-500">还没有开始学习</p>
-            <Link
-              href="/lessons"
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
-            >
-              浏览课程
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {recentLessons.map((lesson) => (
-              <Link
-                key={lesson.id}
-                href={`/lessons/${lesson.id}/${stepPaths[lesson.step] || "video"}`}
-                className="flex items-center justify-between rounded-2xl border border-gray-200/60 bg-white shadow-sm p-4 transition-colors hover:border-brand-200 hover:bg-brand-50/30"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50">
-                    <Play className="h-5 w-5 text-brand-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{lesson.title}</p>
-                    <p className="text-xs text-gray-500">
-                      {lesson.completed
-                        ? "已完成"
-                        : `进行中 · ${stepLabels[lesson.step] || "Step " + lesson.step}`}
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-gray-400" />
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Achievements Preview */}
-      <div>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">成就</h2>
-          <Link
-            href="/achievements"
-            className="flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
-          >
-            查看全部
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        {recentAchievements.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {recentAchievements.map((a, i) => (
+            <p className="mb-1 text-sm font-semibold text-brand-600">继续学习</p>
+            <h2 className="mb-4 text-xl font-bold text-gray-900">
+              {recentLessons[0].title}
+            </h2>
+            <div className="mb-2 h-2.5 overflow-hidden rounded-full bg-gray-100">
               <div
-                key={i}
-                className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-center"
-              >
-                <span className="text-2xl">{a.icon}</span>
-                <p className="mt-1 text-xs font-medium text-gray-700">{a.description}</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6 text-center">
-            <Award className="mx-auto mb-2 h-8 w-8 text-gray-300" />
-            <p className="text-sm text-gray-500">完成学习任务解锁成就</p>
-          </div>
-        )}
-        {achievementProgress.total > 0 && (
-          <div className="mt-3">
-            <div className="flex items-center justify-between text-xs text-gray-400">
-              <span>进度</span>
-              <span>{achievementProgress.unlocked}/{achievementProgress.total}</span>
-            </div>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-gray-100">
-              <div
-                className="h-full rounded-full bg-yellow-500"
-                style={{
-                  width: `${(achievementProgress.unlocked / achievementProgress.total) * 100}%`,
-                }}
+                className="h-full rounded-full bg-brand-500 transition-all"
+                style={{ width: `${(recentLessons[0].step / 5) * 100}%` }}
               />
             </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-400">
+                {recentLessons[0].completed
+                  ? "已完成"
+                  : `进行中 · ${stepLabels[recentLessons[0].step] || ""}`}
+              </p>
+              <span className="text-sm font-medium text-brand-600 opacity-0 transition-opacity group-hover:opacity-100">
+                继续 →
+              </span>
+            </div>
+          </Link>
+        </div>
+      ) : (
+        <div className="mb-8 rounded-2xl bg-white p-10 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50">
+            <BookOpen className="h-7 w-7 text-brand-500" />
           </div>
+          <h2 className="mb-2 text-lg font-bold text-gray-900">开始你的第一课</h2>
+          <p className="mb-6 text-sm text-gray-400">
+            通过真实视频练出地道职场英语
+          </p>
+          <Link
+            href="/lessons"
+            className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
+          >
+            浏览课程
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
+
+      {/* Quick Stats */}
+      <div className="mb-8 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl bg-white px-6 py-4 shadow-sm">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <BookOpen className="h-4 w-4 text-gray-300" />
+          <span>
+            <strong className="text-gray-900">{stats.lessonsCompleted}</strong>{" "}
+            课完成
+          </span>
+        </div>
+        <div className="hidden h-4 w-px bg-gray-200 sm:block" />
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Award className="h-4 w-4 text-gray-300" />
+          <span>
+            <strong className="text-gray-900">{stats.wordsLearned}</strong>{" "}
+            个词汇
+          </span>
+        </div>
+        {stats.totalMinutes > 0 && (
+          <>
+            <div className="hidden h-4 w-px bg-gray-200 sm:block" />
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Clock className="h-4 w-4 text-gray-300" />
+              <span>
+                <strong className="text-gray-900">{stats.totalMinutes}</strong>{" "}
+                分钟
+              </span>
+            </div>
+          </>
         )}
       </div>
+
+      {/* Browse All Courses */}
+      <Link
+        href="/lessons"
+        className="flex items-center justify-between rounded-2xl bg-white px-6 py-5 shadow-sm transition-shadow hover:shadow-md"
+      >
+        <div className="flex items-center gap-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50">
+            <Play className="h-5 w-5 text-brand-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-gray-900">全部课程</p>
+            <p className="text-xs text-gray-400">浏览更多学习内容</p>
+          </div>
+        </div>
+        <ArrowRight className="h-4 w-4 text-gray-300" />
+      </Link>
     </div>
   );
 }

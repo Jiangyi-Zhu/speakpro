@@ -88,7 +88,7 @@ export function ExpressionsClient({ expressions }: Props) {
           {filtered.map((expr) => (
             <div
               key={expr.id}
-              className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-4"
+              className="rounded-2xl bg-white shadow-sm p-4"
             >
               <div className="mb-2 flex items-center gap-2 text-sm text-gray-500">
                 {expr.type === "AUDIO" ? (

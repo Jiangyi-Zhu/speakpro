@@ -377,7 +377,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
       </div>
 
       {/* Transcript */}
-      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-4">
+      <div className="rounded-2xl bg-white shadow-sm p-4">
         <h2 className="mb-3 text-base font-semibold text-gray-900">
           文本对照
         </h2>
@@ -457,7 +457,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
               updateProgress({ step: 1, videoWatched: true });
             }
           }}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+          className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
         >
           下一步：词汇预习
         </Link>

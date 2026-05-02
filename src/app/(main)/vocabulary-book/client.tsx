@@ -105,7 +105,7 @@ export function VocabularyBookClient({ initialWords }: Props) {
           {filtered.map((word) => (
             <div
               key={word.id}
-              className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-4"
+              className="rounded-2xl bg-white shadow-sm p-4"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">

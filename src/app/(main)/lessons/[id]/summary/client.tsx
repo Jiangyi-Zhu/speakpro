@@ -73,7 +73,7 @@ export function SummaryStepClient({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-8">
+      <div className="rounded-2xl bg-white shadow-sm p-8">
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
@@ -130,13 +130,13 @@ export function SummaryStepClient({
       <div className="flex items-center justify-between">
         <Link
           href={`/lessons/${lessonId}/expression`}
-          className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-xl bg-white px-5 py-2.5 text-sm font-medium text-gray-600 shadow-[0_2px_0_0_#E5E7EB] transition-all hover:bg-gray-50 active:translate-y-0.5 active:shadow-none"
         >
           上一步
         </Link>
         <Link
           href="/lessons"
-          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+          className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
         >
           继续学习下一课
           <ArrowRight className="h-4 w-4" />

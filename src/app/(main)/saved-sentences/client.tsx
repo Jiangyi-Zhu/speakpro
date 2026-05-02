@@ -87,7 +87,7 @@ export function SavedSentencesClient({ initialSentences }: Props) {
           {filtered.map((sentence) => (
             <div
               key={sentence.id}
-              className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-4"
+              className="rounded-2xl bg-white shadow-sm p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div

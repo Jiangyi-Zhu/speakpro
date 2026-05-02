@@ -15,7 +15,7 @@ export default function Error({
       <p className="mb-6 text-sm text-gray-500">页面加载时发生错误</p>
       <button
         onClick={reset}
-        className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+        className="rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
       >
         重试
       </button>

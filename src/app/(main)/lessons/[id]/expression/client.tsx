@@ -87,13 +87,13 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
         <div className="flex items-center justify-between">
           <Link
             href={`/lessons/${lessonId}/sentences`}
-            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            className="rounded-xl bg-white px-5 py-2.5 text-sm font-medium text-gray-600 shadow-[0_2px_0_0_#E5E7EB] transition-all hover:bg-gray-50 active:translate-y-0.5 active:shadow-none"
           >
             上一步
           </Link>
           <Link
             href={`/lessons/${lessonId}/summary`}
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+            className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
           >
             下一步：学习总结
           </Link>
@@ -104,7 +104,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6">
+      <div className="rounded-2xl bg-white shadow-sm p-6">
         {/* Question */}
         <div className="mb-6">
           <div className="mb-2 flex items-center justify-between text-sm text-gray-400">
@@ -170,7 +170,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
                 <button
                   onClick={handleSubmit}
                   disabled={!textResponse.trim() || submitting}
-                  className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none disabled:opacity-50"
                 >
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -228,7 +228,7 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
                       <button
                         onClick={handleSubmit}
                         disabled={submitting}
-                        className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none disabled:opacity-50"
                       >
                         {submitting ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -284,14 +284,14 @@ export function ExpressionStepClient({ lessonId, questions }: Props) {
       <div className="flex items-center justify-between">
         <Link
           href={`/lessons/${lessonId}/sentences`}
-          className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="rounded-xl bg-white px-5 py-2.5 text-sm font-medium text-gray-600 shadow-[0_2px_0_0_#E5E7EB] transition-all hover:bg-gray-50 active:translate-y-0.5 active:shadow-none"
         >
           上一步
         </Link>
         <Link
           href={`/lessons/${lessonId}/summary`}
           onClick={() => updateProgress({ step: 4, expressionDone: submitted.size > 0 })}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
+          className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
         >
           下一步：学习总结
         </Link>

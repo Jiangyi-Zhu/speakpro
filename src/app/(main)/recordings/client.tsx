@@ -88,7 +88,7 @@ export function RecordingsClient({ recordings }: Props) {
           {filtered.map((rec) => (
             <div
               key={rec.id}
-              className="rounded-2xl border border-gray-200/60 bg-white shadow-sm p-4"
+              className="rounded-2xl bg-white shadow-sm p-4"
             >
               <div className="flex items-start gap-3">
                 <button

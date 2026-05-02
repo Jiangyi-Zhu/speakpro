@@ -1,19 +1,12 @@
 "use client";
 
+import { Fragment } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Play, BookOpen, Mic, MessageSquare, Award, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LEARNING_STEPS } from "@/types";
 import { useStudyTimer } from "@/hooks/use-study-timer";
-
-const iconMap = {
-  Play,
-  BookOpen,
-  Mic,
-  MessageSquare,
-  Award,
-};
 
 const shortLabels: Record<string, string> = {
   video: "视频",
@@ -32,35 +25,63 @@ export function StepNav({ lessonId, completedSteps = {} }: StepNavProps) {
   const pathname = usePathname();
   useStudyTimer();
 
+  const currentStepIndex = LEARNING_STEPS.findIndex((s) =>
+    pathname?.includes(`/${s.key}`)
+  );
+
   return (
-    <nav className="flex items-center gap-1.5 overflow-x-auto rounded-2xl bg-gray-100/80 p-1.5">
+    <nav className="flex items-center py-2">
       {LEARNING_STEPS.map((step, i) => {
-        const Icon = iconMap[step.icon];
         const href = `/lessons/${lessonId}/${step.key}`;
-        const isActive = pathname?.includes(`/${step.key}`);
+        const isActive = i === currentStepIndex;
         const isCompleted = completedSteps[step.key];
+        const isPast = currentStepIndex >= 0 && i < currentStepIndex;
 
         return (
-          <Link
-            key={step.key}
-            href={href}
-            className={cn(
-              "relative flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-medium transition-all",
-              isActive
-                ? "bg-white text-brand-700 shadow-sm"
-                : isCompleted
-                  ? "text-brand-600 hover:bg-white/50"
-                  : "text-gray-500 hover:bg-white/50 hover:text-gray-700"
+          <Fragment key={step.key}>
+            {i > 0 && (
+              <div
+                className={cn(
+                  "h-0.5 flex-1 transition-colors",
+                  isCompleted || isPast ? "bg-brand-300" : "bg-gray-200"
+                )}
+              />
             )}
-          >
-            {isCompleted && !isActive ? (
-              <Check className="h-4 w-4" />
-            ) : (
-              <Icon className="h-4 w-4" />
-            )}
-            <span className="hidden sm:inline">{step.label}</span>
-            <span className="sm:hidden">{shortLabels[step.key]}</span>
-          </Link>
+            <Link
+              href={href}
+              className="group flex flex-col items-center gap-1.5"
+            >
+              <div
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all",
+                  isActive
+                    ? "bg-brand-600 text-white ring-4 ring-brand-100 scale-110"
+                    : isCompleted
+                      ? "bg-brand-500 text-white"
+                      : "bg-gray-100 text-gray-400 group-hover:bg-gray-200"
+                )}
+              >
+                {isCompleted && !isActive ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <span>{i + 1}</span>
+                )}
+              </div>
+              <span
+                className={cn(
+                  "whitespace-nowrap text-xs font-medium",
+                  isActive
+                    ? "text-brand-700"
+                    : isCompleted
+                      ? "text-brand-600"
+                      : "text-gray-400"
+                )}
+              >
+                <span className="hidden sm:inline">{step.label}</span>
+                <span className="sm:hidden">{shortLabels[step.key]}</span>
+              </span>
+            </Link>
+          </Fragment>
         );
       })}
     </nav>

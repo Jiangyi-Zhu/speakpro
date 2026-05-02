@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Play, Clock, BarChart3, CheckCircle } from "lucide-react";
+import { Play, Clock, CheckCircle, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
@@ -42,10 +42,10 @@ export default async function LessonsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">全部课程</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">全部课程</h1>
+        <p className="mt-2 text-sm text-gray-400">
           选择一个课程开始你的英语学习之旅
         </p>
       </div>
@@ -55,7 +55,7 @@ export default async function LessonsPage() {
           <p className="text-sm text-brand-800">登录后可保存学习进度、生词和录音</p>
           <Link
             href="/login"
-            className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+            className="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
           >
             登录
           </Link>
@@ -73,15 +73,14 @@ export default async function LessonsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-4">
           {lessons.map((lesson) => (
             <Link
               key={lesson.id}
               href={`/lessons/${lesson.id}`}
-              className="group overflow-hidden rounded-2xl border border-gray-200/60 bg-white shadow-sm transition-all hover:border-brand-200 hover:shadow-md"
+              className="group flex items-center gap-5 rounded-2xl bg-white p-4 shadow-sm transition-all hover:shadow-md sm:p-5"
             >
-              {/* Thumbnail */}
-              <div className="relative aspect-video bg-gray-100">
+              <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-gray-100 sm:h-24 sm:w-36">
                 {lesson.coverImage ? (
                   <img
                     src={lesson.coverImage}
@@ -90,55 +89,47 @@ export default async function LessonsPage() {
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
-                    <Play className="h-10 w-10 text-gray-300" />
+                    <Play className="h-8 w-8 text-gray-300 transition-colors group-hover:text-brand-500" />
                   </div>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/10">
-                  <div className="rounded-full bg-white/90 p-3 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                    <Play className="h-5 w-5 text-brand-600" />
-                  </div>
-                </div>
                 {completedLessonIds.has(lesson.id) && (
-                  <div className="absolute right-2 top-2 rounded-full bg-green-500 p-1">
-                    <CheckCircle className="h-4 w-4 text-white" />
+                  <div className="absolute right-1.5 top-1.5 rounded-full bg-green-500 p-0.5">
+                    <CheckCircle className="h-3.5 w-3.5 text-white" />
                   </div>
                 )}
               </div>
-
-              {/* Info */}
-              <div className="p-4">
-                <div className="mb-2 flex items-center gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="mb-1.5 flex items-center gap-2">
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${difficultyColor[lesson.difficulty]}`}
                   >
                     {difficultyLabel[lesson.difficulty]}
                   </span>
                   {lesson.category && (
-                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                    <span className="text-xs text-gray-400">
                       {lesson.category}
                     </span>
                   )}
                 </div>
-                <h3 className="mb-1 font-semibold text-gray-900 group-hover:text-brand-600">
+                <h3 className="mb-1 font-bold text-gray-900 group-hover:text-brand-600">
                   {lesson.title}
                 </h3>
                 {lesson.description && (
-                  <p className="mb-3 line-clamp-2 text-sm text-gray-500">
+                  <p className="line-clamp-1 text-sm text-gray-400">
                     {lesson.description}
                   </p>
                 )}
-                <div className="flex items-center gap-4 text-xs text-gray-400">
+                <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
                   {lesson.duration && (
                     <span className="flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" />
+                      <Clock className="h-3 w-3" />
                       {Math.ceil(lesson.duration / 60)} 分钟
                     </span>
                   )}
-                  <span className="flex items-center gap-1">
-                    <BarChart3 className="h-3.5 w-3.5" />5 步学习
-                  </span>
+                  <span>5 步学习</span>
                 </div>
               </div>
+              <ArrowRight className="hidden h-4 w-4 shrink-0 text-gray-300 transition-colors group-hover:text-brand-500 sm:block" />
             </Link>
           ))}
         </div>

@@ -68,7 +68,7 @@ export default async function ProfilePage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
       {/* Profile Header */}
-      <div className="mb-8 rounded-2xl border border-gray-200/60 bg-white shadow-sm p-6">
+      <div className="mb-8 rounded-2xl bg-white shadow-sm p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-100">
@@ -106,7 +106,7 @@ export default async function ProfilePage() {
       </div>
 
       {/* Menu */}
-      <div className="rounded-2xl border border-gray-200/60 bg-white shadow-sm">
+      <div className="rounded-2xl bg-white shadow-sm">
         {menuItems.map((item, i) => (
           <Link
             key={item.href}
