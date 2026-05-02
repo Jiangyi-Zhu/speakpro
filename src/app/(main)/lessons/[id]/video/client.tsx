@@ -61,6 +61,12 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
   const markedRef = useRef(false);
   const prevGroupRef = useRef(-1);
   const userSeekRef = useRef(false);
+  const loopModeRef = useRef(loopMode);
+  const loopCountRef = useRef(loopCount);
+  const currentLoopNRef = useRef(currentLoopN);
+  loopModeRef.current = loopMode;
+  loopCountRef.current = loopCount;
+  currentLoopNRef.current = currentLoopN;
 
   const timedSegments = useMemo(
     () => segments.filter((s) => s.startTime !== null && s.endTime !== null),
@@ -111,6 +117,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
       setActiveSegIndex(idx);
 
       const gi = idx >= 0 ? Math.floor(idx / groupSize) : -1;
+      const mode = loopModeRef.current;
 
       if (userSeekRef.current) {
         userSeekRef.current = false;
@@ -118,28 +125,33 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
         return;
       }
 
-      if (
-        (loopMode === "single" || loopMode === "times") &&
-        prevGroupRef.current >= 0 &&
-        gi !== prevGroupRef.current
-      ) {
-        const loopGroup = groups[prevGroupRef.current];
-        if (loopGroup) {
-          if (loopMode === "single") {
-            video.currentTime = loopGroup.startTime;
-            return;
-          }
-          if (loopMode === "times") {
-            const next = currentLoopN + 1;
-            if (next < loopCount) {
-              setCurrentLoopN(next);
+      if (mode === "single" || mode === "times") {
+        const loopGi = prevGroupRef.current;
+        if (loopGi >= 0 && loopGi < groups.length) {
+          const loopGroup = groups[loopGi];
+          const crossed = gi !== loopGi;
+          const nearEnd = t >= loopGroup.endTime - 0.2;
+
+          if (crossed || nearEnd) {
+            if (mode === "single") {
               video.currentTime = loopGroup.startTime;
               return;
-            } else {
-              setCurrentLoopN(0);
-              setLoopMode("none");
-              prevGroupRef.current = gi;
-              return;
+            }
+            if (mode === "times") {
+              const next = currentLoopNRef.current + 1;
+              if (next < loopCountRef.current) {
+                currentLoopNRef.current = next;
+                setCurrentLoopN(next);
+                video.currentTime = loopGroup.startTime;
+                return;
+              } else {
+                currentLoopNRef.current = 0;
+                setCurrentLoopN(0);
+                loopModeRef.current = "none";
+                setLoopMode("none");
+                prevGroupRef.current = gi;
+                return;
+              }
             }
           }
         }
@@ -151,30 +163,18 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
     const onEnded = () => {
-      if (loopMode === "all") {
+      const mode = loopModeRef.current;
+      if (mode === "all") {
         video.currentTime = 0;
         video.play();
       } else if (
-        (loopMode === "single" || loopMode === "times") &&
+        (mode === "single" || mode === "times") &&
         prevGroupRef.current >= 0
       ) {
         const loopGroup = groups[prevGroupRef.current];
         if (loopGroup) {
-          if (loopMode === "single") {
-            video.currentTime = loopGroup.startTime;
-            video.play();
-          } else {
-            const next = currentLoopN + 1;
-            if (next < loopCount) {
-              setCurrentLoopN(next);
-              video.currentTime = loopGroup.startTime;
-              video.play();
-            } else {
-              setCurrentLoopN(0);
-              setLoopMode("none");
-              setIsPlaying(false);
-            }
-          }
+          video.currentTime = loopGroup.startTime;
+          video.play();
         }
       } else {
         setIsPlaying(false);
@@ -191,7 +191,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
       video.removeEventListener("pause", onPause);
       video.removeEventListener("ended", onEnded);
     };
-  }, [findActiveSegment, loopMode, loopCount, currentLoopN, groups, groupSize]);
+  }, [findActiveSegment, groups, groupSize]);
 
   useEffect(() => {
     if (activeGroupIndex >= 0) {
