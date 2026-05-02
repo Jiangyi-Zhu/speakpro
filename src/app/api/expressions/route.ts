@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  if (body.audioUrl && body.audioUrl.length > 7 * 1024 * 1024) {
+  if (body.audioUrl && body.audioUrl.length > 5 * 1024 * 1024) {
     return NextResponse.json({ error: "Audio too large (max 5MB)" }, { status: 413 });
   }
 

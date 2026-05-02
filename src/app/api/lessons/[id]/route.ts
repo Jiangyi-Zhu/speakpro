@@ -7,6 +7,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const session = await auth();
+
   const lesson = await prisma.lesson.findUnique({
     where: { id },
     include: {
@@ -16,6 +18,10 @@ export async function GET(
   });
 
   if (!lesson) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (!lesson.published && session?.user?.role !== "ADMIN") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

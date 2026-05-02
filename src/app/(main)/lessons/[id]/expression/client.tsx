@@ -113,7 +113,7 @@ export function ExpressionStepClient({
         }
       }
     }
-  }, [recorder.audioBlob, recorder.isRecording]);
+  }, [recorder.audioBlob, recorder.isRecording, questions, saveExpression, savedQuestions]);
 
   function startRecording() {
     recorderQRef.current = currentQ;

@@ -6,7 +6,6 @@ import {
   BookOpen,
   Mic,
   MessageSquare,
-  Share2,
   ArrowRight,
   Check,
   X,

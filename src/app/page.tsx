@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, Play, Mic, MessageSquare, Award, ArrowRight, LogIn } from "lucide-react";
+import { BookOpen, Play, Mic, MessageSquare, Award, ArrowRight, LogIn, GraduationCap } from "lucide-react";
 import { auth } from "@/lib/auth";
 
 const steps = [
@@ -11,17 +11,22 @@ const steps = [
   {
     icon: BookOpen,
     title: "词汇预习",
-    desc: "标记生词，学习关键词汇的释义和用法",
+    desc: "标记生词，为深入学习做准备",
+  },
+  {
+    icon: GraduationCap,
+    title: "学习生词",
+    desc: "查看释义和发音，结合语境掌握词汇",
   },
   {
     icon: Mic,
-    title: "跟读练习",
-    desc: "逐句跟读，录音对比，纠正发音",
+    title: "句子跟读",
+    desc: "逐句跟读录音，纠正发音语调",
   },
   {
     icon: MessageSquare,
     title: "自由表达",
-    desc: "围绕开放问题，练习口语和写作表达",
+    desc: "围绕开放问题，练习口语表达",
   },
   {
     icon: Award,
@@ -118,7 +123,7 @@ export default async function LandingPage() {
               科学的学习闭环，每一步都在为你的口语能力加分
             </p>
           </div>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {steps.map((step, i) => (
               <div key={i} className="group text-center">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 transition-colors group-hover:bg-brand-600 group-hover:text-white">

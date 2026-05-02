@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, User, Menu, X, Home, GraduationCap, Bookmark, Mic } from "lucide-react";
+import { BookOpen, User, Menu, X, Home, GraduationCap, Bookmark, Mic, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const desktopNav = [
   { href: "/vocabulary-book", label: "生词本" },
   { href: "/saved-sentences", label: "收藏句子" },
   { href: "/recordings", label: "录音" },
+  { href: "/expressions", label: "表达" },
   { href: "/profile", label: "我的" },
 ];
 
@@ -20,6 +21,7 @@ const mobileNav = [
   { href: "/lessons", icon: GraduationCap, label: "课程" },
   { href: "/vocabulary-book", icon: BookOpen, label: "生词" },
   { href: "/recordings", icon: Mic, label: "录音" },
+  { href: "/expressions", icon: MessageSquare, label: "表达" },
   { href: "/profile", icon: User, label: "我的" },
 ];
 

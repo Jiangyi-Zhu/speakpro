@@ -21,7 +21,7 @@ export default async function LessonLayout({
       select: { id: true, title: true },
     });
   } catch {
-    lesson = { id, title: "课程加载中..." };
+    // DB error - fall through to notFound
   }
 
   if (!lesson) {

@@ -79,6 +79,7 @@ export function SentencesStepClient({
   const videoAudioRef = useRef<HTMLAudioElement | null>(null);
   const endTimeRef = useRef<number>(0);
   const recorderSegmentRef = useRef<number>(-1);
+  const markedRef = useRef(false);
 
   const currentSegment = segments[currentIndex];
   const hasAudio =
@@ -205,7 +206,7 @@ export function SentencesStepClient({
         }
       }
     }
-  }, [recorder.audioBlob, recorder.isRecording]);
+  }, [recorder.audioBlob, recorder.isRecording, segments, saveRecording, recordingsSaved]);
 
   function startRecording() {
     stopOriginalAudio();
@@ -420,9 +421,12 @@ export function SentencesStepClient({
           {currentIndex === segments.length - 1 ? (
             <Link
               href={`/lessons/${lessonId}/expression`}
-              onClick={() =>
-                updateProgress({ step: 4, sentencesCompleted: true })
-              }
+              onClick={() => {
+                if (!markedRef.current) {
+                  markedRef.current = true;
+                  updateProgress({ step: 4, sentencesCompleted: true });
+                }
+              }}
               className="flex items-center gap-1 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
             >
               下一步：自由表达

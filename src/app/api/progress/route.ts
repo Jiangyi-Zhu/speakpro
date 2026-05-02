@@ -29,6 +29,23 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
+  if (!body.lessonId || typeof body.lessonId !== "string") {
+    return NextResponse.json({ error: "lessonId required" }, { status: 400 });
+  }
+
+  const existing = await prisma.userProgress.findUnique({
+    where: {
+      userId_lessonId: {
+        userId: session.user.id,
+        lessonId: body.lessonId,
+      },
+    },
+    select: { step: true },
+  });
+
+  const newStep = body.step || 1;
+  const resolvedStep = existing ? Math.max(existing.step, newStep) : newStep;
+
   const progress = await prisma.userProgress.upsert({
     where: {
       userId_lessonId: {
@@ -37,7 +54,7 @@ export async function POST(req: NextRequest) {
       },
     },
     update: {
-      step: body.step,
+      step: resolvedStep,
       videoWatched: body.videoWatched === true ? true : undefined,
       vocabCompleted: body.vocabCompleted === true ? true : undefined,
       wordStudyCompleted: body.wordStudyCompleted === true ? true : undefined,
@@ -50,7 +67,7 @@ export async function POST(req: NextRequest) {
     create: {
       userId: session.user.id,
       lessonId: body.lessonId,
-      step: body.step || 1,
+      step: resolvedStep,
       videoWatched: body.videoWatched === true,
       vocabCompleted: body.vocabCompleted === true,
       wordStudyCompleted: body.wordStudyCompleted === true,

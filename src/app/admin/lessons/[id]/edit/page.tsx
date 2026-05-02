@@ -208,21 +208,38 @@ export default function EditLessonPage() {
       });
     }
 
-    if (segments.length > 0 && isNew) {
-      await fetch(`/api/lessons/${id}/segments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          segments.map((s, i) => ({
-            index: i,
-            textEn: s.textEn,
-            textZh: s.textZh || undefined,
-            grammarNote: s.grammarNote || undefined,
-            startTime: s.startTime ? parseFloat(s.startTime) : undefined,
-            endTime: s.endTime ? parseFloat(s.endTime) : undefined,
-          }))
-        ),
-      });
+    if (segments.length > 0) {
+      if (isNew) {
+        await fetch(`/api/lessons/${id}/segments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            segments.map((s, i) => ({
+              index: i,
+              textEn: s.textEn,
+              textZh: s.textZh || undefined,
+              grammarNote: s.grammarNote || undefined,
+              startTime: s.startTime ? parseFloat(s.startTime) : undefined,
+              endTime: s.endTime ? parseFloat(s.endTime) : undefined,
+            }))
+          ),
+        });
+      } else {
+        await fetch(`/api/lessons/${id}/segments`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            segments.map((s, i) => ({
+              index: i,
+              textEn: s.textEn,
+              textZh: s.textZh || undefined,
+              grammarNote: s.grammarNote || undefined,
+              startTime: s.startTime ? parseFloat(s.startTime) : undefined,
+              endTime: s.endTime ? parseFloat(s.endTime) : undefined,
+            }))
+          ),
+        });
+      }
     }
 
     if (questions.length > 0) {

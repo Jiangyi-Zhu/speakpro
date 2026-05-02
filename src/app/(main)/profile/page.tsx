@@ -58,11 +58,23 @@ export default async function ProfilePage() {
     }
   }
 
+  let achievementCount = 0;
+  if (session?.user?.id) {
+    try {
+      achievementCount = await prisma.userAchievement.count({
+        where: { userId: session.user.id },
+      });
+    } catch {
+      // ignore
+    }
+  }
+
   const menuItems = [
     { href: "/vocabulary-book", icon: BookOpen, label: "生词本", count: vocabCount },
     { href: "/recordings", icon: Mic, label: "我的录音", count: recordingCount },
     { href: "/expressions", icon: MessageSquare, label: "表达积累", count: expressionCount },
     { href: "/saved-sentences", icon: Bookmark, label: "收藏句子", count: savedCount },
+    { href: "/achievements", icon: Award, label: "成就", count: achievementCount },
   ];
 
   return (
@@ -80,13 +92,15 @@ export default async function ProfilePage() {
             </div>
           </div>
           {session?.user && (
-            <Link
-              href="/api/auth/signout"
-              className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50"
-            >
-              <LogOut className="h-4 w-4" />
-              登出
-            </Link>
+            <form action="/api/auth/signout" method="POST">
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50"
+              >
+                <LogOut className="h-4 w-4" />
+                登出
+              </button>
+            </form>
           )}
         </div>
 

@@ -52,8 +52,9 @@ function escapeRegex(s: string) {
 function highlightWord(text: string, word: string) {
   const regex = new RegExp(`(\\b${escapeRegex(word)}\\b)`, "gi");
   const parts = text.split(regex);
-  return parts.map((part, i) =>
-    regex.test(part) ? (
+  return parts.map((part, i) => {
+    const isMatch = part.toLowerCase() === word.toLowerCase();
+    return isMatch ? (
       <span
         key={i}
         className="rounded bg-yellow-200 px-0.5 font-semibold text-yellow-900"
@@ -62,8 +63,8 @@ function highlightWord(text: string, word: string) {
       </span>
     ) : (
       <span key={i}>{part}</span>
-    )
-  );
+    );
+  });
 }
 
 export function WordStudyClient({ lessonId, segments, savedWords }: Props) {

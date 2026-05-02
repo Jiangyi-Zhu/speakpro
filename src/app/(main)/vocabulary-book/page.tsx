@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { VocabularyBookClient } from "./client";
 
 export default async function VocabularyBookPage() {
   const session = await auth();
+  if (!session?.user?.id) redirect("/login");
 
   let words: Array<{
     id: string;

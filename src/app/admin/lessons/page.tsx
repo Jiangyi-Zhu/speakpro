@@ -2,6 +2,12 @@ import Link from "next/link";
 import { Plus, Pencil, Eye, EyeOff, ExternalLink } from "lucide-react";
 import { prisma } from "@/lib/db";
 
+const difficultyLabel: Record<string, string> = {
+  BEGINNER: "入门",
+  INTERMEDIATE: "中级",
+  ADVANCED: "高级",
+};
+
 export default async function AdminLessonsPage() {
   let lessons: Array<{
     id: string;
@@ -62,7 +68,7 @@ export default async function AdminLessonsPage() {
                   <td className="px-4 py-3 font-medium text-gray-900">
                     {lesson.title}
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{lesson.difficulty}</td>
+                  <td className="px-4 py-3 text-gray-500">{difficultyLabel[lesson.difficulty] || lesson.difficulty}</td>
                   <td className="px-4 py-3 text-gray-500">{lesson._count.segments}</td>
                   <td className="px-4 py-3 text-gray-500">{lesson._count.progress}</td>
                   <td className="px-4 py-3">

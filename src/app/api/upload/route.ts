@@ -11,6 +11,10 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { filename, contentType, category } = body;
 
+  if ((category === "video" || category === "subtitle") && session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Admin only" }, { status: 403 });
+  }
+
   if (!filename || !contentType) {
     return NextResponse.json(
       { error: "filename and contentType required" },

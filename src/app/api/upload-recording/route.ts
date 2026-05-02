@@ -21,6 +21,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  if (file.size > 5 * 1024 * 1024) {
+    return NextResponse.json({ error: "Audio too large (max 5MB)" }, { status: 413 });
+  }
+
   const buffer = Buffer.from(await file.arrayBuffer());
   const base64 = buffer.toString("base64");
   const mimeType = file.type || "audio/webm";

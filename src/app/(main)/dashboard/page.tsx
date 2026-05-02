@@ -110,7 +110,7 @@ export default async function DashboardPage() {
             <div className="mb-2 h-2.5 overflow-hidden rounded-full bg-gray-100">
               <div
                 className="h-full rounded-full bg-brand-500 transition-all"
-                style={{ width: `${(recentLessons[0].step / 6) * 100}%` }}
+                style={{ width: `${recentLessons[0].completed ? 100 : (recentLessons[0].step / 6) * 100}%` }}
               />
             </div>
             <div className="flex items-center justify-between">

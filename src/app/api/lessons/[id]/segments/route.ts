@@ -61,10 +61,65 @@ export async function POST(
   return NextResponse.json(segment, { status: 201 });
 }
 
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const body = await req.json();
+
+  if (!Array.isArray(body)) {
+    return NextResponse.json({ error: "Array expected" }, { status: 400 });
+  }
+
+  const segments = await prisma.$transaction(async (tx) => {
+    const maxIndex = body.length - 1;
+    await tx.lessonSegment.deleteMany({
+      where: { lessonId: id, index: { gt: maxIndex } },
+    });
+    return Promise.all(
+      body.map((seg: { index?: number; textEn: string; textZh?: string; grammarNote?: string; startTime?: number; endTime?: number }, i: number) => {
+        const idx = seg.index ?? i;
+        return tx.lessonSegment.upsert({
+          where: { lessonId_index: { lessonId: id, index: idx } },
+          update: {
+            textEn: seg.textEn,
+            textZh: seg.textZh,
+            grammarNote: seg.grammarNote,
+            startTime: seg.startTime,
+            endTime: seg.endTime,
+          },
+          create: {
+            lessonId: id,
+            index: idx,
+            textEn: seg.textEn,
+            textZh: seg.textZh,
+            grammarNote: seg.grammarNote,
+            startTime: seg.startTime,
+            endTime: seg.endTime,
+          },
+        });
+      })
+    );
+  });
+
+  return NextResponse.json(segments);
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
   const { id } = await params;
   const body = await req.json();
 
