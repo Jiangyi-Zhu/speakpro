@@ -35,8 +35,8 @@ export function StepNav({ lessonId, completedSteps = {} }: StepNavProps) {
       {LEARNING_STEPS.map((step, i) => {
         const href = `/lessons/${lessonId}/${step.key}`;
         const isActive = i === currentStepIndex;
-        const isCompleted = completedSteps[step.key];
-        const isPast = currentStepIndex >= 0 && i < currentStepIndex;
+        const isCompleted = !!completedSteps[step.key];
+        const prevCompleted = i > 0 && !!completedSteps[LEARNING_STEPS[i - 1].key];
 
         return (
           <Fragment key={step.key}>
@@ -44,7 +44,7 @@ export function StepNav({ lessonId, completedSteps = {} }: StepNavProps) {
               <div
                 className={cn(
                   "h-0.5 flex-1 transition-colors",
-                  isCompleted || isPast ? "bg-brand-300" : "bg-gray-200"
+                  prevCompleted ? "bg-brand-300" : "bg-gray-200"
                 )}
               />
             )}

@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   MessageSquare,
   Mic,
   Square,
-  Send,
   ChevronLeft,
   ChevronRight,
   Check,
@@ -37,14 +36,6 @@ export function ExpressionStepClient({
   initialSubmissions = {},
 }: Props) {
   const [currentQ, setCurrentQ] = useState(0);
-  const [submitted, setSubmitted] = useState<Set<number>>(() => {
-    const set = new Set<number>();
-    questions.forEach((q, idx) => {
-      if (initialSubmissions[q.id]) set.add(idx);
-    });
-    return set;
-  });
-  const [submitting, setSubmitting] = useState(false);
   const [showAnswer, setShowAnswer] = useState<Set<number>>(new Set());
   const [questionAudioUrls, setQuestionAudioUrls] = useState<Map<number, string>>(
     () => {
@@ -57,6 +48,14 @@ export function ExpressionStepClient({
       return map;
     }
   );
+  const [savedQuestions, setSavedQuestions] = useState<Set<number>>(() => {
+    const set = new Set<number>();
+    questions.forEach((q, idx) => {
+      if (initialSubmissions[q.id]) set.add(idx);
+    });
+    return set;
+  });
+  const [savingQuestion, setSavingQuestion] = useState(false);
 
   const recorder = useAudioRecorder();
   const { updateProgress } = useProgress(lessonId);
@@ -65,58 +64,60 @@ export function ExpressionStepClient({
 
   const currentAudioUrl = questionAudioUrls.get(currentQ);
 
+  const saveExpression = useCallback(
+    async (blob: Blob, qId: string, idx: number) => {
+      setSavingQuestion(true);
+      try {
+        const buffer = await blob.arrayBuffer();
+        const base64 = btoa(
+          new Uint8Array(buffer).reduce((s, b) => s + String.fromCharCode(b), "")
+        );
+        const audioUrl = `data:audio/webm;base64,${base64}`;
+
+        const res = await fetch("/api/expressions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lessonId,
+            questionId: qId,
+            type: "AUDIO",
+            audioUrl,
+          }),
+        });
+
+        if (res.ok) {
+          setSavedQuestions((prev) => {
+            const next = new Set([...prev, idx]);
+            if (next.size >= questions.length) {
+              updateProgress({ step: 5, expressionDone: true });
+            }
+            return next;
+          });
+        }
+      } catch {
+        // ignore
+      }
+      setSavingQuestion(false);
+    },
+    [lessonId, questions.length, updateProgress]
+  );
+
   useEffect(() => {
     if (recorder.audioBlob && !recorder.isRecording) {
       const idx = recorderQRef.current;
       if (idx >= 0 && idx < questions.length) {
         const url = URL.createObjectURL(recorder.audioBlob);
         setQuestionAudioUrls((prev) => new Map(prev).set(idx, url));
+        if (!savedQuestions.has(idx)) {
+          saveExpression(recorder.audioBlob, questions[idx].id, idx);
+        }
       }
     }
-  }, [recorder.audioBlob, recorder.isRecording, questions.length]);
+  }, [recorder.audioBlob, recorder.isRecording]);
 
   function startRecording() {
     recorderQRef.current = currentQ;
     recorder.startRecording();
-  }
-
-  async function handleSubmit() {
-    setSubmitting(true);
-    try {
-      const blob = recorder.audioBlob;
-      let audioUrl: string | undefined;
-
-      if (blob) {
-        const buffer = await blob.arrayBuffer();
-        const base64 = btoa(
-          new Uint8Array(buffer).reduce((s, b) => s + String.fromCharCode(b), "")
-        );
-        audioUrl = `data:audio/webm;base64,${base64}`;
-      }
-
-      await fetch("/api/expressions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          lessonId,
-          questionId: question?.id,
-          type: "AUDIO",
-          audioUrl,
-        }),
-      });
-
-      setSubmitted((prev) => {
-        const next = new Set([...prev, currentQ]);
-        if (next.size >= questions.length) {
-          updateProgress({ step: 5, expressionDone: true });
-        }
-        return next;
-      });
-    } catch {
-      // ignore
-    } finally {
-      setSubmitting(false);
-    }
   }
 
   function handleReRecord() {
@@ -125,7 +126,7 @@ export function ExpressionStepClient({
       next.delete(currentQ);
       return next;
     });
-    setSubmitted((prev) => {
+    setSavedQuestions((prev) => {
       const next = new Set(prev);
       next.delete(currentQ);
       return next;
@@ -160,7 +161,6 @@ export function ExpressionStepClient({
   }
 
   const isRecordingThisQ = recorder.isRecording && recorderQRef.current === currentQ;
-  const hasActiveRecording = !recorder.isRecording && recorder.audioUrl && recorderQRef.current === currentQ;
 
   return (
     <div className="space-y-6">
@@ -172,10 +172,10 @@ export function ExpressionStepClient({
               <MessageSquare className="h-4 w-4" />
               Question {currentQ + 1} / {questions.length}
             </span>
-            {submitted.has(currentQ) && (
+            {savedQuestions.has(currentQ) && (
               <span className="flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
                 <Check className="h-3 w-3" />
-                已提交
+                已保存
               </span>
             )}
           </div>
@@ -191,27 +191,22 @@ export function ExpressionStepClient({
 
         {/* Audio Recording */}
         <div className="flex flex-col items-center gap-4 py-6">
-          {!currentAudioUrl && !hasActiveRecording && (
-            <button
-              onClick={
-                isRecordingThisQ ? recorder.stopRecording : startRecording
-              }
-              disabled={submitted.has(currentQ)}
-              className={`flex h-20 w-20 items-center justify-center rounded-full transition-all ${
-                isRecordingThisQ
-                  ? "bg-red-500 text-white shadow-lg shadow-red-500/30 animate-pulse"
-                  : submitted.has(currentQ)
-                    ? "bg-gray-300 text-white"
-                    : "bg-brand-600 text-white shadow-lg shadow-brand-600/30 hover:bg-brand-700"
-              }`}
-            >
-              {isRecordingThisQ ? (
-                <Square className="h-8 w-8" />
-              ) : (
-                <Mic className="h-8 w-8" />
-              )}
-            </button>
-          )}
+          <button
+            onClick={
+              isRecordingThisQ ? recorder.stopRecording : startRecording
+            }
+            className={`flex h-20 w-20 items-center justify-center rounded-full transition-all ${
+              isRecordingThisQ
+                ? "bg-red-500 text-white shadow-lg shadow-red-500/30 animate-pulse"
+                : "bg-brand-600 text-white shadow-lg shadow-brand-600/30 hover:bg-brand-700"
+            }`}
+          >
+            {isRecordingThisQ ? (
+              <Square className="h-8 w-8" />
+            ) : (
+              <Mic className="h-8 w-8" />
+            )}
+          </button>
 
           {isRecordingThisQ && (
             <p className="text-sm font-medium text-red-500">
@@ -219,52 +214,34 @@ export function ExpressionStepClient({
             </p>
           )}
 
+          {!isRecordingThisQ && !currentAudioUrl && (
+            <p className="text-sm text-gray-400">点击麦克风用英语回答问题</p>
+          )}
+
           {/* Show saved/recorded audio */}
-          {(currentAudioUrl || hasActiveRecording) && !recorder.isRecording && (
+          {currentAudioUrl && !recorder.isRecording && (
             <div className="flex w-full flex-col items-center gap-3">
               <audio
-                src={hasActiveRecording ? recorder.audioUrl! : currentAudioUrl}
+                src={currentAudioUrl}
                 controls
                 className="w-full max-w-sm"
               />
-              <div className="flex gap-3">
-                {!submitted.has(currentQ) && hasActiveRecording && (
-                  <>
-                    <button
-                      onClick={recorder.resetRecording}
-                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
-                    >
-                      重录
-                    </button>
-                    <button
-                      onClick={handleSubmit}
-                      disabled={submitting}
-                      className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none disabled:opacity-50"
-                    >
-                      {submitting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                      提交
-                    </button>
-                  </>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleReRecord}
+                  className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  重录
+                </button>
+                {savingQuestion && recorderQRef.current === currentQ && (
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
                 )}
-                {submitted.has(currentQ) && (
-                  <button
-                    onClick={handleReRecord}
-                    className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    重新录制
-                  </button>
+                {savedQuestions.has(currentQ) && !savingQuestion && (
+                  <Check className="h-4 w-4 text-green-600" />
                 )}
               </div>
             </div>
-          )}
-
-          {!recorder.isRecording && !currentAudioUrl && !hasActiveRecording && !submitted.has(currentQ) && (
-            <p className="text-sm text-gray-400">点击麦克风用英语回答问题</p>
           )}
 
           {recorder.error && (
@@ -335,7 +312,7 @@ export function ExpressionStepClient({
         </Link>
         <Link
           href={`/lessons/${lessonId}/summary`}
-          onClick={() => updateProgress({ step: 5, expressionDone: submitted.size > 0 })}
+          onClick={() => updateProgress({ step: 5, expressionDone: savedQuestions.size > 0 })}
           className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
         >
           下一步：学习总结
