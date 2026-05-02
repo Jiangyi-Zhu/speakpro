@@ -147,8 +147,6 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
               } else {
                 currentLoopNRef.current = 0;
                 setCurrentLoopN(0);
-                loopModeRef.current = "none";
-                setLoopMode("none");
                 prevGroupRef.current = gi;
                 return;
               }
