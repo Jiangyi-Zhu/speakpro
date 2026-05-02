@@ -60,3 +60,26 @@ export async function POST(
 
   return NextResponse.json(segment, { status: 201 });
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const body = await req.json();
+
+  if (!body.id) {
+    return NextResponse.json({ error: "Segment id required" }, { status: 400 });
+  }
+
+  const segment = await prisma.lessonSegment.update({
+    where: { id: body.id, lessonId: id },
+    data: {
+      ...(body.grammarNote !== undefined && { grammarNote: body.grammarNote }),
+      ...(body.textZh !== undefined && { textZh: body.textZh }),
+      ...(body.textEn !== undefined && { textEn: body.textEn }),
+    },
+  });
+
+  return NextResponse.json(segment);
+}
