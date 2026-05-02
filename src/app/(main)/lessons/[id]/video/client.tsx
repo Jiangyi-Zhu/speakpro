@@ -47,7 +47,6 @@ function formatTime(seconds: number): string {
 export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
   const [showEnglish, setShowEnglish] = useState(true);
   const [showChinese, setShowChinese] = useState(true);
-  const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [loopMode, setLoopMode] = useState<LoopMode>("none");
   const [loopCount, setLoopCount] = useState(3);
@@ -65,9 +64,11 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
   const loopModeRef = useRef(loopMode);
   const loopCountRef = useRef(loopCount);
   const currentLoopNRef = useRef(currentLoopN);
+  const playbackRateRef = useRef(playbackRate);
   loopModeRef.current = loopMode;
   loopCountRef.current = loopCount;
   currentLoopNRef.current = currentLoopN;
+  playbackRateRef.current = playbackRate;
 
   const timedSegments = useMemo(
     () => segments.filter((s) => s.startTime !== null && s.endTime !== null),
@@ -113,7 +114,6 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
 
     const onTimeUpdate = () => {
       const t = video.currentTime;
-      setCurrentTime(t);
       const idx = findActiveSegment(t);
       setActiveSegIndex(idx);
 
@@ -165,7 +165,10 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
       prevGroupRef.current = gi;
     };
 
-    const onPlay = () => setIsPlaying(true);
+    const onPlay = () => {
+      setIsPlaying(true);
+      video.playbackRate = playbackRateRef.current;
+    };
     const onPause = () => setIsPlaying(false);
     const onEnded = () => {
       const mode = loopModeRef.current;
@@ -197,6 +200,12 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
       video.removeEventListener("ended", onEnded);
     };
   }, [findActiveSegment, groups, groupSize]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = playbackRate;
+    }
+  }, [playbackRate]);
 
   useEffect(() => {
     if (activeGroupIndex >= 0) {

@@ -284,21 +284,7 @@ export function WordStudyClient({ lessonId, segments, savedWords }: Props) {
             <ChevronLeft className="h-4 w-4" />
             上一个
           </button>
-          {learnIndex === savedWords.length - 1 ? (
-            <Link
-              href={`/lessons/${lessonId}/sentences`}
-              onClick={() => {
-                if (!markedRef.current) {
-                  markedRef.current = true;
-                  updateProgress({ step: 3, wordStudyCompleted: true });
-                }
-              }}
-              className="flex items-center gap-1 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_3px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
-            >
-              学完了，下一步
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          ) : (
+          {learnIndex < savedWords.length - 1 ? (
             <button
               onClick={nextCard}
               className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-brand-600 hover:bg-brand-50"
@@ -306,8 +292,33 @@ export function WordStudyClient({ lessonId, segments, savedWords }: Props) {
               下一个
               <ChevronRight className="h-4 w-4" />
             </button>
+          ) : (
+            <span className="text-xs text-gray-400">已是最后一个</span>
           )}
         </div>
+      </div>
+
+      {/* Page Navigation */}
+      <div className="flex items-center justify-between">
+        <Link
+          href={`/lessons/${lessonId}/vocabulary`}
+          className="rounded-xl bg-white px-5 py-2.5 text-sm font-medium text-gray-600 shadow-[0_2px_0_0_#E5E7EB] transition-all hover:bg-gray-50 active:translate-y-0.5 active:shadow-none"
+        >
+          上一步
+        </Link>
+        <Link
+          href={`/lessons/${lessonId}/sentences`}
+          onClick={() => {
+            if (!markedRef.current) {
+              markedRef.current = true;
+              updateProgress({ step: 3, wordStudyCompleted: true });
+            }
+          }}
+          className="inline-flex items-center gap-2 rounded-2xl bg-brand-600 px-6 py-3 text-sm font-bold text-white shadow-[0_4px_0_0_#2C524A] transition-all hover:brightness-105 active:translate-y-0.5 active:shadow-none"
+        >
+          下一步：句子跟读
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
     </div>
   );

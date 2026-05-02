@@ -102,32 +102,30 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="text-sm leading-loose text-gray-800">
           {segments.map((seg) => (
-            <div key={seg.id} className="rounded-lg p-3 hover:bg-gray-50">
-              <p className="text-sm leading-relaxed text-gray-800">
-                {seg.textEn.split(/(\s+)/).map((token, i) => {
-                  const cleaned = token
-                    .replace(/[^a-zA-Z'-]/g, "")
-                    .toLowerCase();
-                  const isMarked = savedWords.has(cleaned);
-                  if (!token.trim()) return token;
-                  return (
-                    <span
-                      key={i}
-                      onClick={() => handleWordClick(token)}
-                      className={`cursor-pointer rounded px-0.5 transition-colors ${
-                        isMarked
-                          ? "bg-yellow-200 text-yellow-900"
-                          : "hover:bg-brand-100"
-                      }`}
-                    >
-                      {token}
-                    </span>
-                  );
-                })}
-              </p>
-            </div>
+            <span key={seg.id}>
+              {seg.textEn.split(/(\s+)/).map((token, i) => {
+                const cleaned = token
+                  .replace(/[^a-zA-Z'-]/g, "")
+                  .toLowerCase();
+                const isMarked = savedWords.has(cleaned);
+                if (!token.trim()) return token;
+                return (
+                  <span
+                    key={i}
+                    onClick={() => handleWordClick(token)}
+                    className={`cursor-pointer rounded px-0.5 transition-colors ${
+                      isMarked
+                        ? "bg-yellow-200 text-yellow-900"
+                        : "hover:bg-brand-100"
+                    }`}
+                  >
+                    {token}
+                  </span>
+                );
+              })}{" "}
+            </span>
           ))}
         </div>
 
