@@ -11,7 +11,6 @@ import {
   ChevronRight,
   ArrowRight,
   Eye,
-  EyeOff,
 } from "lucide-react";
 import { useProgress } from "@/hooks/use-progress";
 
@@ -57,7 +56,6 @@ function highlightWord(text: string, word: string) {
 
 export function VocabularyStepClient({ lessonId, segments }: Props) {
   const [savedWords, setSavedWords] = useState<Map<string, SavedWord>>(new Map());
-  const [showTranslation, setShowTranslation] = useState(true);
   const [phase, setPhase] = useState<"mark" | "learn">("mark");
   const [learnIndex, setLearnIndex] = useState(0);
   const [showMeaning, setShowMeaning] = useState(false);
@@ -144,17 +142,8 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
     return (
       <div className="space-y-6">
         <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4">
             <h2 className="text-base font-semibold text-gray-900">阅读文章，点击标记生词</h2>
-            <button
-              onClick={() => setShowTranslation(!showTranslation)}
-              className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium ${
-                showTranslation ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {showTranslation ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
-              翻译
-            </button>
           </div>
 
           <div className="space-y-4">
@@ -180,9 +169,6 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
                     );
                   })}
                 </p>
-                {showTranslation && seg.textZh && (
-                  <p className="mt-1 text-sm text-gray-500">{seg.textZh}</p>
-                )}
               </div>
             ))}
           </div>
