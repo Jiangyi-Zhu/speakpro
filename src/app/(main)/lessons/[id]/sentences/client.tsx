@@ -17,6 +17,7 @@ import {
   Loader2,
   Play,
   ArrowRight,
+  Volume2,
 } from "lucide-react";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { useProgress } from "@/hooks/use-progress";
@@ -47,9 +48,23 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
   const [recordingsSaved, setRecordingsSaved] = useState<Set<number>>(new Set());
   const [savingRecording, setSavingRecording] = useState(false);
 
+  const [ttsPlaying, setTtsPlaying] = useState(false);
+
   const recorder = useAudioRecorder();
   const { updateProgress } = useProgress(lessonId);
   const originalAudioRef = useRef<HTMLAudioElement>(null);
+
+  function speakText(text: string) {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    utterance.rate = 0.9;
+    setTtsPlaying(true);
+    utterance.onend = () => setTtsPlaying(false);
+    utterance.onerror = () => setTtsPlaying(false);
+    window.speechSynthesis.speak(utterance);
+  }
 
   const currentSegment = segments[currentIndex];
 
@@ -210,18 +225,32 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
         )}
 
         {/* Original Audio */}
-        {currentSegment.audioUrl && (
-          <div className="mt-6 flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
-            <button
-              onClick={() => originalAudioRef.current?.play()}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white hover:bg-brand-700"
-            >
+        <div className="mt-6 flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
+          <button
+            onClick={() => {
+              if (currentSegment.audioUrl) {
+                originalAudioRef.current?.play();
+              } else {
+                speakText(currentSegment.textEn);
+              }
+            }}
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-colors ${
+              ttsPlaying && !currentSegment.audioUrl
+                ? "bg-orange-500"
+                : "bg-brand-600 hover:bg-brand-700"
+            }`}
+          >
+            {ttsPlaying && !currentSegment.audioUrl ? (
+              <Volume2 className="h-3.5 w-3.5" />
+            ) : (
               <Play className="h-3.5 w-3.5" />
-            </button>
-            <span className="text-sm text-gray-500">播放原音</span>
+            )}
+          </button>
+          <span className="text-sm text-gray-500">播放原音</span>
+          {currentSegment.audioUrl && (
             <audio ref={originalAudioRef} src={currentSegment.audioUrl} />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Recording Controls */}
         <div className="mt-6 flex flex-col items-center gap-4">

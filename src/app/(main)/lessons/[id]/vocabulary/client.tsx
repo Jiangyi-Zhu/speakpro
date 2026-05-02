@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   BookOpen,
@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ArrowRight,
   Eye,
+  Volume2,
 } from "lucide-react";
 import { useProgress } from "@/hooks/use-progress";
 
@@ -23,6 +24,16 @@ interface Segment {
 interface SavedWord {
   word: string;
   status: "saving" | "saved" | "error";
+}
+
+interface DictEntry {
+  word: string;
+  phonetic: string;
+  audioUrl: string;
+  meanings: Array<{
+    partOfSpeech: string;
+    definitions: Array<{ definition: string; example: string | null }>;
+  }>;
 }
 
 interface Props {
@@ -63,8 +74,38 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
   const [phase, setPhase] = useState<"mark" | "learn">("mark");
   const [learnIndex, setLearnIndex] = useState(0);
   const [showMeaning, setShowMeaning] = useState(false);
+  const [dictCache, setDictCache] = useState<Map<string, DictEntry | null>>(new Map());
+  const [dictLoading, setDictLoading] = useState(false);
   const { updateProgress } = useProgress(lessonId);
   const markedRef = useRef(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const wordList = Array.from(savedWords.values());
+  const currentWord = wordList[learnIndex];
+
+  useEffect(() => {
+    if (phase !== "learn" || !currentWord) return;
+    const w = currentWord.word;
+    if (dictCache.has(w)) return;
+    setDictLoading(true);
+    fetch(`/api/dictionary?word=${encodeURIComponent(w)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        setDictCache((prev) => new Map(prev).set(w, data));
+      })
+      .catch(() => {
+        setDictCache((prev) => new Map(prev).set(w, null));
+      })
+      .finally(() => setDictLoading(false));
+  }, [phase, learnIndex, currentWord, dictCache]);
+
+  function playAudio(url: string) {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    audioRef.current = new Audio(url);
+    audioRef.current.play().catch(() => {});
+  }
 
   const handleWordClick = useCallback(
     (token: string) => {
@@ -116,9 +157,8 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
     [lessonId]
   );
 
-  const wordList = Array.from(savedWords.values());
-  const currentWord = wordList[learnIndex];
   const currentContext = currentWord ? findWordContext(currentWord.word, segments) : null;
+  const currentDict = currentWord ? dictCache.get(currentWord.word) : undefined;
 
   function startLearning() {
     if (wordList.length === 0) return;
@@ -262,10 +302,49 @@ export function VocabularyStepClient({ lessonId, segments }: Props) {
         {/* Flashcard */}
         {currentWord && (
           <div className="py-4">
-            {/* Word */}
+            {/* Word + Phonetic + Audio */}
             <div className="mb-6 text-center">
               <h2 className="text-3xl font-bold text-gray-900">{currentWord.word}</h2>
+              {dictLoading && (
+                <Loader2 className="mx-auto mt-2 h-4 w-4 animate-spin text-gray-300" />
+              )}
+              {currentDict && (
+                <div className="mt-2 flex items-center justify-center gap-2">
+                  {currentDict.phonetic && (
+                    <span className="text-sm text-gray-400">{currentDict.phonetic}</span>
+                  )}
+                  {currentDict.audioUrl && (
+                    <button
+                      onClick={() => playAudio(currentDict.audioUrl)}
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-50 text-brand-600 hover:bg-brand-100"
+                    >
+                      <Volume2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
+
+            {/* Definitions */}
+            {currentDict && currentDict.meanings.length > 0 && (
+              <div className="mb-4 space-y-3">
+                {currentDict.meanings.map((m, mi) => (
+                  <div key={mi}>
+                    <span className="inline-block rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
+                      {m.partOfSpeech}
+                    </span>
+                    {m.definitions.map((d, di) => (
+                      <div key={di} className="mt-1.5 pl-2">
+                        <p className="text-sm leading-relaxed text-gray-700">{d.definition}</p>
+                        {d.example && (
+                          <p className="mt-0.5 text-xs italic text-gray-400">{d.example}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Context sentence */}
             {currentContext && (
