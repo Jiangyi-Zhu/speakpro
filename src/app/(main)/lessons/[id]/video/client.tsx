@@ -42,8 +42,8 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
   return (
     <div className="space-y-6">
       {/* Video Player */}
-      <div className="relative aspect-video overflow-hidden rounded-xl bg-gray-900">
-        {videoUrl ? (
+      {videoUrl && (
+        <div className="relative aspect-video overflow-hidden rounded-xl bg-gray-900">
           <ReactPlayer
             ref={(p: any) => { playerRef.current = p; }}
             url={videoUrl}
@@ -54,32 +54,24 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
               setCurrentTime(state.playedSeconds)
             }
           />
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center text-white">
-            <Play className="mb-3 h-16 w-16 text-white/50" />
-            <p className="text-sm text-white/60">视频播放区域</p>
-            <p className="mt-1 text-xs text-white/40">
-              管理后台上传视频后将在此播放
-            </p>
-          </div>
-        )}
 
-        {/* Live subtitle overlay */}
-        {activeSegment && (
-          <div className="absolute bottom-4 left-4 right-4 text-center">
-            {showEnglish && (
-              <p className="mb-1 rounded bg-black/70 px-3 py-1 text-sm text-white">
-                {activeSegment.textEn}
-              </p>
-            )}
-            {showChinese && activeSegment.textZh && (
-              <p className="rounded bg-black/50 px-3 py-1 text-xs text-gray-200">
-                {activeSegment.textZh}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+          {/* Live subtitle overlay */}
+          {activeSegment && (
+            <div className="absolute bottom-4 left-4 right-4 text-center">
+              {showEnglish && (
+                <p className="mb-1 rounded bg-black/70 px-3 py-1 text-sm text-white">
+                  {activeSegment.textEn}
+                </p>
+              )}
+              {showChinese && activeSegment.textZh && (
+                <p className="rounded bg-black/50 px-3 py-1 text-xs text-gray-200">
+                  {activeSegment.textZh}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Subtitle Controls */}
       <div className="flex items-center gap-3">

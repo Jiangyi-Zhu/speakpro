@@ -79,9 +79,13 @@ export async function DELETE(req: NextRequest) {
 
   const body = await req.json();
 
-  await prisma.vocabularyItem.deleteMany({
-    where: { id: body.id, userId: session.user.id },
-  });
+  const where: { userId: string; id?: string; word?: string } = {
+    userId: session.user.id,
+  };
+  if (body.id) where.id = body.id;
+  else if (body.word) where.word = body.word;
+
+  await prisma.vocabularyItem.deleteMany({ where });
 
   return NextResponse.json({ ok: true });
 }

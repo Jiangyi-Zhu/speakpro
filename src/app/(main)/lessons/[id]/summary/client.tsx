@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useProgress } from "@/hooks/use-progress";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface Props {
   lessonId: string;
@@ -34,13 +34,14 @@ export function SummaryStepClient({
   expressionDone,
 }: Props) {
   const { updateProgress } = useProgress(lessonId);
-  const [completed, setCompleted] = useState(false);
+  const tracked = useRef(false);
 
-  function handleComplete() {
-    if (completed) return;
-    setCompleted(true);
-    updateProgress({ step: 5, summaryGenerated: true, completed: true });
-  }
+  useEffect(() => {
+    if (!tracked.current) {
+      tracked.current = true;
+      updateProgress({ step: 5, summaryGenerated: true, completed: true });
+    }
+  }, [updateProgress]);
 
   const stats = [
     {
@@ -118,33 +119,10 @@ export function SummaryStepClient({
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            onClick={handleComplete}
-            disabled={completed}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
-              completed
-                ? "bg-green-100 text-green-700"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
-          >
-            {completed ? (
-              <>
-                <Check className="h-4 w-4" />
-                已完成本课
-              </>
-            ) : (
-              <>
-                <Award className="h-4 w-4" />
-                标记本课完成
-              </>
-            )}
-          </button>
-          <button className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
-            <Share2 className="h-4 w-4" />
-            分享成绩
-          </button>
+        {/* Completed badge */}
+        <div className="flex items-center justify-center gap-2 rounded-lg bg-green-50 py-3 text-sm font-medium text-green-700">
+          <Check className="h-4 w-4" />
+          本课学习已完成
         </div>
       </div>
 
