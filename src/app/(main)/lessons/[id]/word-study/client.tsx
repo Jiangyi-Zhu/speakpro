@@ -82,10 +82,12 @@ export function WordStudyClient({ lessonId, segments, savedWords }: Props) {
     ? findWordContext(currentWord, segments)
     : null;
   const currentDict = currentWord ? dictCache.get(currentWord) : undefined;
+  const fetchedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!currentWord) return;
-    if (dictCache.has(currentWord)) return;
+    if (fetchedRef.current.has(currentWord)) return;
+    fetchedRef.current.add(currentWord);
     setDictLoading(true);
     fetch(`/api/dictionary?word=${encodeURIComponent(currentWord)}`)
       .then((res) => (res.ok ? res.json() : null))
@@ -96,7 +98,16 @@ export function WordStudyClient({ lessonId, segments, savedWords }: Props) {
         setDictCache((prev) => new Map(prev).set(currentWord, null));
       })
       .finally(() => setDictLoading(false));
-  }, [currentWord, dictCache]);
+  }, [currentWord]);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   function playAudio(url: string) {
     if (audioRef.current) audioRef.current.pause();
@@ -182,6 +193,9 @@ export function WordStudyClient({ lessonId, segments, savedWords }: Props) {
               <h2 className="text-3xl font-bold text-gray-900">{currentWord}</h2>
               {dictLoading && (
                 <Loader2 className="mx-auto mt-2 h-4 w-4 animate-spin text-gray-300" />
+              )}
+              {!dictLoading && currentDict === null && (
+                <p className="mt-2 text-sm text-gray-400">未找到释义</p>
               )}
               {currentDict && (
                 <div className="mt-2 flex flex-col items-center gap-1">

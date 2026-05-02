@@ -16,6 +16,7 @@ import {
   Play,
   ArrowRight,
   Volume2,
+  Pause,
 } from "lucide-react";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { useProgress } from "@/hooks/use-progress";
@@ -60,34 +61,61 @@ export function SentencesStepClient({
   const { updateProgress } = useProgress(lessonId);
   const originalAudioRef = useRef<HTMLAudioElement>(null);
   const videoAudioRef = useRef<HTMLAudioElement | null>(null);
-  const stopTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const endTimeRef = useRef<number>(0);
 
   const currentSegment = segments[currentIndex];
   const hasAudio =
     currentSegment?.audioUrl ||
     (videoUrl && currentSegment?.startTime != null);
 
+  useEffect(() => {
+    if (!videoUrl) return;
+    const audio = new Audio(videoUrl);
+    audio.preload = "auto";
+    const onTimeUpdate = () => {
+      if (endTimeRef.current > 0 && audio.currentTime >= endTimeRef.current) {
+        audio.pause();
+        endTimeRef.current = 0;
+        setIsPlayingOriginal(false);
+      }
+    };
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("ended", () => setIsPlayingOriginal(false));
+    videoAudioRef.current = audio;
+    return () => {
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.pause();
+    };
+  }, [videoUrl]);
+
+  function stopOriginalAudio() {
+    if (videoAudioRef.current) {
+      videoAudioRef.current.pause();
+      endTimeRef.current = 0;
+    }
+    originalAudioRef.current?.pause();
+    setIsPlayingOriginal(false);
+  }
+
   function playSegmentAudio(seg: Segment) {
-    if (seg.audioUrl) {
-      originalAudioRef.current?.play();
+    stopOriginalAudio();
+
+    if (seg.audioUrl && originalAudioRef.current) {
+      setIsPlayingOriginal(true);
+      originalAudioRef.current.currentTime = 0;
+      originalAudioRef.current.play().catch(() => {});
+      originalAudioRef.current.onended = () => setIsPlayingOriginal(false);
       return;
     }
-    if (!videoUrl || seg.startTime == null || seg.endTime == null) return;
 
-    if (!videoAudioRef.current || videoAudioRef.current.src !== videoUrl) {
-      videoAudioRef.current = new Audio(videoUrl);
-    }
+    if (!videoAudioRef.current || seg.startTime == null || seg.endTime == null)
+      return;
+
     const audio = videoAudioRef.current;
-    clearTimeout(stopTimerRef.current);
     audio.currentTime = seg.startTime;
+    endTimeRef.current = seg.endTime;
     setIsPlayingOriginal(true);
-    audio.play().catch(() => {});
-
-    const duration = (seg.endTime - seg.startTime) * 1000;
-    stopTimerRef.current = setTimeout(() => {
-      audio.pause();
-      setIsPlayingOriginal(false);
-    }, duration);
+    audio.play().catch(() => setIsPlayingOriginal(false));
   }
 
   async function toggleSave() {
@@ -158,10 +186,9 @@ export function SentencesStepClient({
     }
   }, [recorder.audioBlob, recorder.isRecording]);
 
-  function stopOriginalAudio() {
-    clearTimeout(stopTimerRef.current);
-    videoAudioRef.current?.pause();
-    setIsPlayingOriginal(false);
+  function startRecording() {
+    stopOriginalAudio();
+    recorder.startRecording();
   }
 
   function goNext() {
@@ -241,7 +268,11 @@ export function SentencesStepClient({
           <div className="flex items-center gap-2.5">
             {hasAudio ? (
               <button
-                onClick={() => playSegmentAudio(currentSegment)}
+                onClick={() =>
+                  isPlayingOriginal
+                    ? stopOriginalAudio()
+                    : playSegmentAudio(currentSegment)
+                }
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white transition-colors ${
                   isPlayingOriginal
                     ? "bg-orange-500"
@@ -249,7 +280,7 @@ export function SentencesStepClient({
                 }`}
               >
                 {isPlayingOriginal ? (
-                  <Volume2 className="h-4 w-4" />
+                  <Pause className="h-4 w-4" />
                 ) : (
                   <Play className="h-4 w-4" />
                 )}
@@ -259,7 +290,9 @@ export function SentencesStepClient({
                 <Play className="h-4 w-4" />
               </div>
             )}
-            <span className="text-sm text-gray-500">原音</span>
+            <span className="text-sm text-gray-500">
+              {isPlayingOriginal ? "播放中" : "原音"}
+            </span>
             {currentSegment.audioUrl && (
               <audio ref={originalAudioRef} src={currentSegment.audioUrl} />
             )}
@@ -268,15 +301,11 @@ export function SentencesStepClient({
           {/* Record */}
           <div className="flex items-center gap-2.5">
             <span className="text-sm text-gray-500">
-              {recorder.isRecording
-                ? `${recorder.duration}s`
-                : "跟读"}
+              {recorder.isRecording ? `${recorder.duration}s` : "跟读"}
             </span>
             <button
               onClick={
-                recorder.isRecording
-                  ? recorder.stopRecording
-                  : recorder.startRecording
+                recorder.isRecording ? recorder.stopRecording : startRecording
               }
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all ${
                 recorder.isRecording
@@ -320,7 +349,9 @@ export function SentencesStepClient({
         {/* Grammar Note */}
         {currentSegment.grammarNote && (
           <div className="mt-4 rounded-lg bg-brand-50 p-4">
-            <p className="mb-1 text-xs font-semibold text-brand-600">语法解析</p>
+            <p className="mb-1 text-xs font-semibold text-brand-600">
+              语法解析
+            </p>
             <p className="text-sm leading-relaxed text-brand-800">
               {currentSegment.grammarNote}
             </p>

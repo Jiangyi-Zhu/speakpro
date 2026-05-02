@@ -19,11 +19,12 @@ interface SavedWord {
 interface Props {
   lessonId: string;
   segments: Segment[];
+  initialSavedWords?: string[];
 }
 
-export function VocabularyStepClient({ lessonId, segments }: Props) {
+export function VocabularyStepClient({ lessonId, segments, initialSavedWords = [] }: Props) {
   const [savedWords, setSavedWords] = useState<Map<string, SavedWord>>(
-    new Map()
+    () => new Map(initialSavedWords.map((w) => [w, { word: w, status: "saved" as const }]))
   );
   const { updateProgress } = useProgress(lessonId);
   const markedRef = useRef(false);
