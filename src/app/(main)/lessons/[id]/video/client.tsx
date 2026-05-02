@@ -147,7 +147,13 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
               } else {
                 currentLoopNRef.current = 0;
                 setCurrentLoopN(0);
-                prevGroupRef.current = gi;
+                const nextGi = loopGi + 1;
+                if (nextGi < groups.length) {
+                  video.currentTime = groups[nextGi].startTime;
+                  prevGroupRef.current = nextGi;
+                } else {
+                  prevGroupRef.current = -1;
+                }
                 return;
               }
             }

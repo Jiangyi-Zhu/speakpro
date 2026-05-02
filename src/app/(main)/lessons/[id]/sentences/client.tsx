@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Mic,
@@ -13,7 +13,6 @@ import {
   ChevronLeft,
   ChevronRight,
   BookOpen,
-  Save,
   Check,
   Loader2,
   Play,
@@ -86,15 +85,13 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
     setSavingSentence(false);
   }
 
-  async function saveRecording() {
-    if (!recorder.audioBlob) return;
+  const saveRecording = useCallback(async (blob: Blob, segId: string, idx: number) => {
     setSavingRecording(true);
-
     try {
       const formData = new FormData();
-      formData.append("file", recorder.audioBlob, "recording.webm");
+      formData.append("file", blob, "recording.webm");
       formData.append("lessonId", lessonId);
-      formData.append("segmentId", currentSegment.id);
+      formData.append("segmentId", segId);
       formData.append("duration", String(recorder.duration));
 
       const res = await fetch("/api/upload-recording", {
@@ -103,14 +100,19 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
       });
 
       if (res.ok) {
-        setRecordingsSaved((prev) => new Set([...prev, currentIndex]));
+        setRecordingsSaved((prev) => new Set([...prev, idx]));
       }
     } catch {
       // ignore
     }
-
     setSavingRecording(false);
-  }
+  }, [lessonId, recorder.duration]);
+
+  useEffect(() => {
+    if (recorder.audioBlob && !recorder.isRecording && !recordingsSaved.has(currentIndex)) {
+      saveRecording(recorder.audioBlob, currentSegment.id, currentIndex);
+    }
+  }, [recorder.audioBlob, recorder.isRecording]);
 
   function goNext() {
     if (currentIndex < segments.length - 1) {
@@ -251,7 +253,7 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
           {recorder.audioUrl && !recorder.isRecording && (
             <div className="flex flex-col items-center gap-3">
               <audio src={recorder.audioUrl} controls className="h-10" />
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={recorder.resetRecording}
                   className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
@@ -259,22 +261,14 @@ export function SentencesStepClient({ lessonId, segments, initialSavedSegmentIds
                   <RotateCcw className="h-3.5 w-3.5" />
                   重录
                 </button>
-                {!recordingsSaved.has(currentIndex) && (
-                  <button
-                    onClick={saveRecording}
-                    disabled={savingRecording}
-                    className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
-                  >
-                    {savingRecording ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Save className="h-3.5 w-3.5" />
-                    )}
-                    保存
-                  </button>
+                {savingRecording && (
+                  <span className="flex items-center gap-1.5 text-sm text-gray-400">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    保存中
+                  </span>
                 )}
-                {recordingsSaved.has(currentIndex) && (
-                  <span className="flex items-center gap-1.5 rounded-lg bg-green-50 px-3 py-2 text-sm font-medium text-green-700">
+                {recordingsSaved.has(currentIndex) && !savingRecording && (
+                  <span className="flex items-center gap-1.5 text-sm text-green-600">
                     <Check className="h-3.5 w-3.5" />
                     已保存
                   </span>
