@@ -32,6 +32,8 @@ export default async function VideoStepPage({
         index: s.index,
         textEn: s.textEn,
         textZh: s.textZh || "",
+        startTime: s.startTime,
+        endTime: s.endTime,
       }))}
     />
   );
