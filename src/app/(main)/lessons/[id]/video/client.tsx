@@ -2,19 +2,14 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-import { Play, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useProgress } from "@/hooks/use-progress";
-
-const ReactPlayer = dynamic(() => import("react-player"), { ssr: false }) as any;
 
 interface Segment {
   id: string;
   index: number;
   textEn: string;
   textZh: string;
-  startTime: number | null;
-  endTime: number | null;
 }
 
 interface Props {
@@ -23,53 +18,41 @@ interface Props {
   segments: Segment[];
 }
 
+function getYouTubeEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    let videoId: string | null = null;
+    if (u.hostname.includes("youtube.com")) {
+      videoId = u.searchParams.get("v");
+    } else if (u.hostname === "youtu.be") {
+      videoId = u.pathname.slice(1);
+    }
+    if (videoId) {
+      return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+    }
+  } catch {}
+  return null;
+}
+
 export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
   const [showEnglish, setShowEnglish] = useState(true);
   const [showChinese, setShowChinese] = useState(true);
-  const [currentTime, setCurrentTime] = useState(0);
-  const playerRef = useRef<any>(null);
   const { updateProgress } = useProgress(lessonId);
   const markedRef = useRef(false);
 
-  const activeSegment = segments.find(
-    (s) =>
-      s.startTime !== null &&
-      s.endTime !== null &&
-      currentTime >= s.startTime &&
-      currentTime <= s.endTime
-  );
+  const embedUrl = videoUrl ? getYouTubeEmbedUrl(videoUrl) : null;
 
   return (
     <div className="space-y-6">
       {/* Video Player */}
-      {videoUrl && (
-        <div className="relative aspect-video overflow-hidden rounded-xl bg-gray-900">
-          <ReactPlayer
-            ref={(p: any) => { playerRef.current = p; }}
-            url={videoUrl}
-            width="100%"
-            height="100%"
-            controls
-            onProgress={(state: any) =>
-              setCurrentTime(state.playedSeconds)
-            }
+      {embedUrl && (
+        <div className="aspect-video overflow-hidden rounded-xl bg-gray-900">
+          <iframe
+            src={embedUrl}
+            className="h-full w-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
           />
-
-          {/* Live subtitle overlay */}
-          {activeSegment && (
-            <div className="absolute bottom-4 left-4 right-4 text-center">
-              {showEnglish && (
-                <p className="mb-1 rounded bg-black/70 px-3 py-1 text-sm text-white">
-                  {activeSegment.textEn}
-                </p>
-              )}
-              {showChinese && activeSegment.textZh && (
-                <p className="rounded bg-black/50 px-3 py-1 text-xs text-gray-200">
-                  {activeSegment.textZh}
-                </p>
-              )}
-            </div>
-          )}
         </div>
       )}
 
@@ -84,7 +67,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
           }`}
         >
           {showEnglish ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-          英文字幕
+          英文
         </button>
         <button
           onClick={() => setShowChinese(!showChinese)}
@@ -95,7 +78,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
           }`}
         >
           {showChinese ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-          中文翻译
+          中文
         </button>
       </div>
 
@@ -107,34 +90,22 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
         {segments.length === 0 ? (
           <p className="text-sm text-gray-500">暂无文本内容</p>
         ) : (
-          <div className="space-y-4">
-            {segments.map((seg) => {
-              const isActive = activeSegment?.id === seg.id;
-              return (
-                <div
-                  key={seg.id}
-                  className={`cursor-pointer rounded-lg p-3 transition-colors ${
-                    isActive ? "bg-blue-50 ring-1 ring-blue-200" : "hover:bg-gray-50"
-                  }`}
-                  onClick={() => {
-                    if (seg.startTime !== null && playerRef.current) {
-                      (playerRef.current as any).seekTo(seg.startTime, "seconds");
-                    }
-                  }}
-                >
-                  {showEnglish && (
-                    <p
-                      className={`text-sm ${isActive ? "font-medium text-blue-900" : "text-gray-800"}`}
-                    >
-                      {seg.textEn}
-                    </p>
-                  )}
-                  {showChinese && seg.textZh && (
-                    <p className="mt-1 text-sm text-gray-500">{seg.textZh}</p>
-                  )}
-                </div>
-              );
-            })}
+          <div className="space-y-3">
+            {segments.map((seg) => (
+              <div
+                key={seg.id}
+                className="rounded-lg p-3 hover:bg-gray-50"
+              >
+                {showEnglish && (
+                  <p className="text-sm leading-relaxed text-gray-800">
+                    {seg.textEn}
+                  </p>
+                )}
+                {showChinese && seg.textZh && (
+                  <p className="mt-1 text-sm text-gray-500">{seg.textZh}</p>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
