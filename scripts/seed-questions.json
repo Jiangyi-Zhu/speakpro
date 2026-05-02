@@ -1,0 +1,35 @@
+{
+  "lessonId": "lesson-job-interview",
+  "questions": [
+    {
+      "question": "Please introduce yourself and talk about what you do for a living.",
+      "hint": "可以用 I'm a... / I work as... / I work for... 等本课学到的句型",
+      "sampleAnswer": "Hi, I'm Lisa. I'm a software engineer. I work for a tech company in Shanghai. I'm responsible for developing mobile applications and managing our development team.",
+      "sortOrder": 0
+    },
+    {
+      "question": "Describe where you work and what company you work for. Use 'work for', 'work at', and 'work in' correctly.",
+      "hint": "注意三个介词的区别：for 跟公司/雇主，at 跟地点，in 跟行业/领域",
+      "sampleAnswer": "I work for a multinational consulting firm called Deloitte. I work at their Beijing office, which is located downtown. I work in the finance department, specifically in auditing.",
+      "sortOrder": 1
+    },
+    {
+      "question": "What are you responsible for at your job? Describe your main duties.",
+      "hint": "用 I'm responsible for + 动名词（doing）来描述你的工作职责",
+      "sampleAnswer": "I'm responsible for hiring and training new employees. I'm also responsible for managing our team's budget and making sure we meet our quarterly goals.",
+      "sortOrder": 2
+    },
+    {
+      "question": "Imagine you run your own business. Describe it in English.",
+      "hint": "可以用 self-employed / run my own business / own a business 等表达",
+      "sampleAnswer": "I'm self-employed. I run my own design studio. I create logos and branding materials for small businesses. I have my own office but I also work from home sometimes.",
+      "sortOrder": 3
+    },
+    {
+      "question": "Your friend just lost their job. How would you talk about their situation politely in English?",
+      "hint": "想想 between jobs 和 unemployed 的语气区别，哪个更委婉？",
+      "sampleAnswer": "My friend is currently between jobs. He used to work for a marketing agency, but the company downsized. He's confident that he'll find a new position soon because he has a lot of experience in digital marketing.",
+      "sortOrder": 4
+    }
+  ]
+}
