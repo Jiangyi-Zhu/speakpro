@@ -12,11 +12,40 @@
 
 | 步骤     | 功能          | 描述                              |
 | ------ | ----------- | ------------------------------- |
-| Step 1 | 视频学习        | 带字幕视频播放 + 双语文本对照，支持英文/中文字幕开关    |
-| Step 2 | 文章初览 + 词汇预习 | 浏览全文标记生词，学习释义和用法，生词收藏到生词本       |
-| Step 3 | 句子学习 + 跟读练习 | 逐句中文对照（可开关）、语法解析、录音练习、原音对照、句子收藏 |
+| Step 1 | 视频学习        | HTML5 视频播放 + 实时字幕同步 + 逐句/段落粒度切换 + 4种循环模式 |
+| Step 2 | 词汇预习 | 浏览全文点击标记生词 → 闪卡式逐词学习（含原文语境高亮）|
+| Step 3 | 句子跟读 | 逐句中英对照、语法解析、录音练习、原音对照、句子收藏 |
 | Step 4 | 自由表达        | 开放问题口语或写作表达                     |
 | Step 5 | 学习总结        | 生成个性化学习成果分享卡片                   |
+
+### 视频播放器
+
+- 原生 HTML5 `<video>` 播放（解决 react-player + React 19 不兼容问题）
+- 实时字幕同步：基于 `timeupdate` 事件匹配 segment 时间戳
+- 4 种播放模式：顺序播放 → 单句循环 → 循环N遍 → 全文循环
+- 粒度切换：逐句（每个 segment）/ 段落（4句一组）
+- 英文/中文字幕独立开关
+- 点击文本对照区跳转播放
+
+### 字幕导入工具链
+
+```bash
+# 1. 下载视频 + 字幕
+yt-dlp --cookies-from-browser chrome -f "best[height<=480]" -o "public/videos/lesson1.mp4" "https://youtube.com/watch?v=VIDEO_ID"
+yt-dlp --cookies-from-browser chrome --write-auto-sub --sub-lang "en-orig" --sub-format json3 --skip-download -o "public/videos/lesson1" "https://youtube.com/watch?v=VIDEO_ID"
+
+# 2. 解析字幕 → 自动分句（json3 逐词毫秒级时间戳）
+DATABASE_URL="..." npx tsx scripts/import-subtitles.ts \
+  --json3 public/videos/lesson1.en-orig.json3 \
+  --lesson-id <id> \
+  [--translations translations.json] \
+  [--pause-ms 900] [--min-duration 5] [--max-duration 16]
+
+# 3. 校准现有 segment 时间轴（用 json3 词级数据修正）
+DATABASE_URL="..." npx tsx scripts/fix-timestamps.ts \
+  --json3 public/videos/lesson1.en-orig.json3 \
+  --lesson-id <id>
+```
 
 ### 用户系统
 
@@ -36,76 +65,47 @@
 
 | 层级 | 技术选型 | 理由 |
 |------|----------|------|
-| **框架** | Next.js 16 (App Router) | SSR/SSG、API Routes、部署友好 |
+| **框架** | Next.js 16 (App Router) + React 19 | SSR/SSG、API Routes、部署友好 |
 | **语言** | TypeScript | 类型安全，适合大型项目 |
 | **样式** | Tailwind CSS 4 + shadcn/ui | 快速开发、一致性、可定制 |
-| **数据库** | PostgreSQL | 关系型数据，适合用户/课程/进度等结构化数据 |
+| **数据库** | PostgreSQL (Neon) | 关系型数据，Serverless 冷启动友好 |
 | **ORM** | Prisma | 类型安全的数据库访问，迁移管理 |
 | **认证** | NextAuth.js (Auth.js v5) | 生产级认证，支持多 Provider |
-| **存储** | Cloudflare R2 / AWS S3 | 视频、音频文件存储（S3 兼容） |
-| **部署** | Vercel + 独立 PostgreSQL | 前端 Vercel，数据库 Supabase/Neon |
-| **音频处理** | Web Audio API + MediaRecorder | 浏览器端录音和音频对比 |
-| **视频播放** | React Player | 支持字幕、倍速、进度控制 |
+| **视频播放** | 原生 HTML5 `<video>` | React 19 兼容，字幕同步精确控制 |
+| **字幕解析** | YouTube json3 (逐词时间戳) | 毫秒级精度，优于 SRT 的滑动窗口格式 |
+| **部署** | Vercel（auto-deploy on push） | GitHub 集成，零配置 |
 
 ## 项目结构
 
 ```
 workplace-english/
-├── README.md
-├── DEVELOPMENT_PLAN.md
-├── CLAUDE.md
-├── prisma/
-│   └── schema.prisma
+├── prisma/schema.prisma          # 数据库模型
+├── scripts/
+│   ├── import-subtitles.ts       # json3 → segments 解析器
+│   ├── fix-timestamps.ts         # 用 json3 校准现有时间轴
+│   └── seed-fine-segments.ts     # 手动 seed 脚本（含中文翻译）
+├── public/videos/                # 视频 + 字幕文件
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   ├── globals.css
-│   │   ├── (auth)/
-│   │   │   ├── login/page.tsx
-│   │   │   └── register/page.tsx
-│   │   ├── (main)/
-│   │   │   ├── layout.tsx
-│   │   │   ├── dashboard/page.tsx
-│   │   │   ├── lessons/
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── [id]/
-│   │   │   │       ├── page.tsx
-│   │   │   │       ├── video/page.tsx
-│   │   │   │       ├── vocabulary/page.tsx
-│   │   │   │       ├── sentences/page.tsx
-│   │   │   │       ├── expression/page.tsx
-│   │   │   │       └── summary/page.tsx
-│   │   │   ├── profile/page.tsx
-│   │   │   └── vocabulary-book/page.tsx
-│   │   ├── admin/
-│   │   │   ├── layout.tsx
-│   │   │   ├── page.tsx
-│   │   │   └── lessons/
-│   │   │       ├── page.tsx
-│   │   │       └── [id]/edit/page.tsx
-│   │   └── api/
-│   │       ├── auth/[...nextauth]/route.ts
-│   │       ├── lessons/route.ts
-│   │       ├── progress/route.ts
-│   │       ├── vocabulary/route.ts
-│   │       ├── recordings/route.ts
-│   │       └── upload/route.ts
+│   │   ├── (auth)/               # 登录注册
+│   │   ├── (main)/               # 主应用（需认证）
+│   │   │   ├── dashboard/
+│   │   │   ├── lessons/[id]/
+│   │   │   │   ├── video/        # Step 1: 视频播放器
+│   │   │   │   ├── vocabulary/   # Step 2: 词汇预习（标记+闪卡）
+│   │   │   │   ├── sentences/    # Step 3: 跟读练习
+│   │   │   │   ├── expression/   # Step 4: 自由表达
+│   │   │   │   └── summary/      # Step 5: 学习总结
+│   │   │   ├── vocabulary-book/  # 生词本
+│   │   │   └── saved-sentences/  # 收藏句子
+│   │   ├── admin/                # 管理后台
+│   │   └── api/                  # API Routes
 │   ├── components/
-│   │   ├── ui/           (shadcn/ui)
-│   │   ├── layout/
-│   │   ├── lesson/
-│   │   └── player/
-│   ├── lib/
-│   │   ├── db.ts
-│   │   ├── auth.ts
-│   │   ├── auth-config.ts
-│   │   ├── storage.ts
-│   │   └── utils.ts
-│   ├── hooks/
-│   └── types/
-├── .env.example
-└── package.json
+│   │   ├── ui/                   # shadcn/ui
+│   │   ├── layout/               # 布局组件
+│   │   └── lesson/               # 课程组件（step-nav 等）
+│   ├── hooks/                    # use-progress 等
+│   └── lib/                      # db, auth, utils
 ```
 
 ## 数据库设计
@@ -115,12 +115,13 @@ workplace-english/
 - **User** — 用户信息 + 学习统计
 - **Account / Session** — NextAuth 认证表
 - **Lesson** — 课程（视频 + 元数据）
-- **LessonSegment** — 课程分段（逐句，含原文/翻译/语法解析/音频时间戳）
+- **LessonSegment** — 课程分段（逐句，含原文/翻译/语法解析/startTime/endTime）
 - **UserProgress** — 用户学习进度（每课程每步骤）
 - **VocabularyItem** — 生词本条目
 - **Recording** — 用户录音记录
 - **Expression** — 用户写作/口语表达
 - **SavedSentence** — 收藏的句子
+- **ExpressionQuestion** — 自由表达问题
 - **Achievement / UserAchievement** — 成就徽章
 
 ## 本地开发
@@ -155,19 +156,22 @@ npm run dev
 
 ### 更新部署流程
 
-本地改完代码后，3 步更新线上：
-
 ```bash
 git add -A
 git commit -m "描述你改了什么"
 git push
+# Vercel 自动构建部署，1-2 分钟网站就更新
 ```
 
-push 到 GitHub 后，Vercel 自动构建部署，1-2 分钟网站就更新了。
+### 添加新课程
+
+1. 用 yt-dlp 下载视频（480p）和 json3 字幕
+2. 在数据库创建 Lesson 记录（可通过 Admin 后台或 Prisma Studio）
+3. 运行 `import-subtitles.ts` 解析字幕生成 segments
+4. 可选：准备 translations.json 添加中文翻译
+5. 可选：运行 `fix-timestamps.ts` 用 json3 精校时间轴
 
 ### Vercel 环境变量
-
-在 Vercel 控制台 Settings → Environment Variables 中配置：
 
 | 变量名 | 说明 |
 |--------|------|

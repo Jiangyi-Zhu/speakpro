@@ -59,6 +59,8 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
   const transcriptRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const { updateProgress } = useProgress(lessonId);
   const markedRef = useRef(false);
+  const prevGroupRef = useRef(-1);
+  const userSeekRef = useRef(false);
 
   const timedSegments = useMemo(
     () => segments.filter((s) => s.startTime !== null && s.endTime !== null),
@@ -83,6 +85,10 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
     return Math.floor(activeSegIndex / groupSize);
   }, [activeSegIndex, groupSize]);
 
+  useEffect(() => {
+    prevGroupRef.current = -1;
+  }, [groupSize]);
+
   const findActiveSegment = useCallback(
     (time: number) => {
       for (let i = 0; i < timedSegments.length; i++) {
@@ -104,30 +110,42 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
       const idx = findActiveSegment(t);
       setActiveSegIndex(idx);
 
-      if (idx < 0) return;
+      const gi = idx >= 0 ? Math.floor(idx / groupSize) : -1;
 
-      const gi = Math.floor(idx / groupSize);
-      const group = groups[gi];
-      if (!group) return;
-
-      if (loopMode === "single") {
-        if (t >= group.endTime - 0.05) {
-          video.currentTime = group.startTime;
-        }
+      if (userSeekRef.current) {
+        userSeekRef.current = false;
+        prevGroupRef.current = gi;
+        return;
       }
 
-      if (loopMode === "times") {
-        if (t >= group.endTime - 0.05) {
-          const next = currentLoopN + 1;
-          if (next < loopCount) {
-            setCurrentLoopN(next);
-            video.currentTime = group.startTime;
-          } else {
-            setCurrentLoopN(0);
-            setLoopMode("none");
+      if (
+        (loopMode === "single" || loopMode === "times") &&
+        prevGroupRef.current >= 0 &&
+        gi !== prevGroupRef.current
+      ) {
+        const loopGroup = groups[prevGroupRef.current];
+        if (loopGroup) {
+          if (loopMode === "single") {
+            video.currentTime = loopGroup.startTime;
+            return;
+          }
+          if (loopMode === "times") {
+            const next = currentLoopN + 1;
+            if (next < loopCount) {
+              setCurrentLoopN(next);
+              video.currentTime = loopGroup.startTime;
+              return;
+            } else {
+              setCurrentLoopN(0);
+              setLoopMode("none");
+              prevGroupRef.current = gi;
+              return;
+            }
           }
         }
       }
+
+      prevGroupRef.current = gi;
     };
 
     const onPlay = () => setIsPlaying(true);
@@ -136,6 +154,28 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
       if (loopMode === "all") {
         video.currentTime = 0;
         video.play();
+      } else if (
+        (loopMode === "single" || loopMode === "times") &&
+        prevGroupRef.current >= 0
+      ) {
+        const loopGroup = groups[prevGroupRef.current];
+        if (loopGroup) {
+          if (loopMode === "single") {
+            video.currentTime = loopGroup.startTime;
+            video.play();
+          } else {
+            const next = currentLoopN + 1;
+            if (next < loopCount) {
+              setCurrentLoopN(next);
+              video.currentTime = loopGroup.startTime;
+              video.play();
+            } else {
+              setCurrentLoopN(0);
+              setLoopMode("none");
+              setIsPlaying(false);
+            }
+          }
+        }
       } else {
         setIsPlaying(false);
       }
@@ -162,6 +202,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
 
   function seekTo(time: number) {
     if (videoRef.current) {
+      userSeekRef.current = true;
       videoRef.current.currentTime = time;
       if (!isPlaying) videoRef.current.play();
     }
@@ -278,7 +319,6 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
         )}
 
         <div className="ml-auto flex gap-2">
-          {/* Granularity toggle */}
           <div className="flex overflow-hidden rounded-lg border border-gray-300">
             {[
               { size: 1, label: "逐句", icon: List },
@@ -371,7 +411,10 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
                     const segIsActive =
                       timedSegments.indexOf(seg) === activeSegIndex;
                     return (
-                      <div key={seg.id} className={groupSize > 1 ? "mb-2 last:mb-0" : ""}>
+                      <div
+                        key={seg.id}
+                        className={groupSize > 1 ? "mb-2 last:mb-0" : ""}
+                      >
                         {showEnglish && (
                           <p
                             className={`text-sm leading-relaxed ${
