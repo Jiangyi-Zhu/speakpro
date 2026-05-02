@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   Eye,
@@ -10,6 +10,8 @@ import {
   Play,
   Pause,
   RotateCcw,
+  AlignJustify,
+  List,
 } from "lucide-react";
 import { useProgress } from "@/hooks/use-progress";
 
@@ -20,6 +22,12 @@ interface Segment {
   textZh: string;
   startTime: number | null;
   endTime: number | null;
+}
+
+interface SegmentGroup {
+  segments: Segment[];
+  startTime: number;
+  endTime: number;
 }
 
 type LoopMode = "none" | "all" | "single" | "times";
@@ -45,15 +53,35 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
   const [loopCount, setLoopCount] = useState(3);
   const [currentLoopN, setCurrentLoopN] = useState(0);
   const [activeSegIndex, setActiveSegIndex] = useState(-1);
+  const [groupSize, setGroupSize] = useState(1);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const transcriptRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const { updateProgress } = useProgress(lessonId);
   const markedRef = useRef(false);
 
-  const timedSegments = segments.filter(
-    (s) => s.startTime !== null && s.endTime !== null
+  const timedSegments = useMemo(
+    () => segments.filter((s) => s.startTime !== null && s.endTime !== null),
+    [segments]
   );
+
+  const groups = useMemo(() => {
+    const result: SegmentGroup[] = [];
+    for (let i = 0; i < timedSegments.length; i += groupSize) {
+      const chunk = timedSegments.slice(i, i + groupSize);
+      result.push({
+        segments: chunk,
+        startTime: chunk[0].startTime!,
+        endTime: chunk[chunk.length - 1].endTime!,
+      });
+    }
+    return result;
+  }, [timedSegments, groupSize]);
+
+  const activeGroupIndex = useMemo(() => {
+    if (activeSegIndex < 0) return -1;
+    return Math.floor(activeSegIndex / groupSize);
+  }, [activeSegIndex, groupSize]);
 
   const findActiveSegment = useCallback(
     (time: number) => {
@@ -76,20 +104,24 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
       const idx = findActiveSegment(t);
       setActiveSegIndex(idx);
 
-      if (loopMode === "single" && idx >= 0) {
-        const seg = timedSegments[idx];
-        if (t >= seg.endTime! - 0.05) {
-          video.currentTime = seg.startTime!;
+      if (idx < 0) return;
+
+      const gi = Math.floor(idx / groupSize);
+      const group = groups[gi];
+      if (!group) return;
+
+      if (loopMode === "single") {
+        if (t >= group.endTime - 0.05) {
+          video.currentTime = group.startTime;
         }
       }
 
-      if (loopMode === "times" && idx >= 0) {
-        const seg = timedSegments[idx];
-        if (t >= seg.endTime! - 0.05) {
+      if (loopMode === "times") {
+        if (t >= group.endTime - 0.05) {
           const next = currentLoopN + 1;
           if (next < loopCount) {
             setCurrentLoopN(next);
-            video.currentTime = seg.startTime!;
+            video.currentTime = group.startTime;
           } else {
             setCurrentLoopN(0);
             setLoopMode("none");
@@ -119,14 +151,14 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
       video.removeEventListener("pause", onPause);
       video.removeEventListener("ended", onEnded);
     };
-  }, [findActiveSegment, loopMode, loopCount, currentLoopN, timedSegments]);
+  }, [findActiveSegment, loopMode, loopCount, currentLoopN, groups, groupSize]);
 
   useEffect(() => {
-    if (activeSegIndex >= 0) {
-      const el = transcriptRefs.current.get(activeSegIndex);
+    if (activeGroupIndex >= 0) {
+      const el = transcriptRefs.current.get(activeGroupIndex);
       el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
-  }, [activeSegIndex]);
+  }, [activeGroupIndex]);
 
   function seekTo(time: number) {
     if (videoRef.current) {
@@ -152,14 +184,13 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
 
   const loopLabel: Record<LoopMode, string> = {
     none: "顺序播放",
-    single: "单句循环",
+    single: groupSize === 1 ? "单句循环" : "段落循环",
     times: `循环 ${loopCount} 遍`,
     all: "全文循环",
   };
 
   return (
     <div className="space-y-4">
-      {/* Video Player */}
       {videoUrl && (
         <div className="overflow-hidden rounded-xl bg-gray-900">
           <video
@@ -170,7 +201,6 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
             preload="metadata"
           />
 
-          {/* Subtitle overlay */}
           {activeSegIndex >= 0 && (
             <div className="bg-gray-900 px-4 py-3">
               {showEnglish && (
@@ -248,6 +278,27 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
         )}
 
         <div className="ml-auto flex gap-2">
+          {/* Granularity toggle */}
+          <div className="flex overflow-hidden rounded-lg border border-gray-300">
+            {[
+              { size: 1, label: "逐句", icon: List },
+              { size: 4, label: "段落", icon: AlignJustify },
+            ].map(({ size, label, icon: Icon }) => (
+              <button
+                key={size}
+                onClick={() => setGroupSize(size)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                  groupSize === size
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </button>
+            ))}
+          </div>
+
           <button
             onClick={() => setShowEnglish(!showEnglish)}
             className={`flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
@@ -290,19 +341,17 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
           <p className="text-sm text-gray-500">暂无文本内容</p>
         ) : (
           <div className="max-h-[420px] space-y-2 overflow-y-auto">
-            {timedSegments.map((seg, i) => {
-              const isActive = i === activeSegIndex;
+            {groups.map((group, gi) => {
+              const isActive = gi === activeGroupIndex;
               return (
                 <div
-                  key={seg.id}
+                  key={group.segments[0].id}
                   ref={(el) => {
-                    if (el) transcriptRefs.current.set(i, el);
+                    if (el) transcriptRefs.current.set(gi, el);
                   }}
                   onClick={() => {
-                    if (seg.startTime !== null) {
-                      seekTo(seg.startTime);
-                      if (loopMode === "times") setCurrentLoopN(0);
-                    }
+                    seekTo(group.startTime);
+                    if (loopMode === "times") setCurrentLoopN(0);
                   }}
                   className={`cursor-pointer rounded-lg p-3 transition-colors ${
                     isActive
@@ -312,28 +361,38 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
                 >
                   <div className="mb-1 flex items-center gap-2">
                     <span className="text-xs text-gray-400">
-                      {formatTime(seg.startTime!)}
+                      {formatTime(group.startTime)}
                     </span>
                     {isActive && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
                     )}
                   </div>
-                  {showEnglish && (
-                    <p
-                      className={`text-sm leading-relaxed ${
-                        isActive
-                          ? "font-medium text-blue-900"
-                          : "text-gray-800"
-                      }`}
-                    >
-                      {seg.textEn}
-                    </p>
-                  )}
-                  {showChinese && seg.textZh && (
-                    <p className="mt-1 text-sm leading-relaxed text-gray-500">
-                      {seg.textZh}
-                    </p>
-                  )}
+                  {group.segments.map((seg) => {
+                    const segIsActive =
+                      timedSegments.indexOf(seg) === activeSegIndex;
+                    return (
+                      <div key={seg.id} className={groupSize > 1 ? "mb-2 last:mb-0" : ""}>
+                        {showEnglish && (
+                          <p
+                            className={`text-sm leading-relaxed ${
+                              segIsActive
+                                ? "font-medium text-blue-900"
+                                : isActive
+                                  ? "text-blue-800"
+                                  : "text-gray-800"
+                            }`}
+                          >
+                            {seg.textEn}
+                          </p>
+                        )}
+                        {showChinese && seg.textZh && (
+                          <p className="mt-0.5 text-sm leading-relaxed text-gray-500">
+                            {seg.textZh}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               );
             })}
