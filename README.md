@@ -175,8 +175,8 @@ git push
 
 ### Vercel 环境变量
 
-| 变量名 | 说明 |
-|--------|------|
-| `DATABASE_URL` | Neon PostgreSQL 连接字符串 |
-| `NEXTAUTH_SECRET` | 认证加密密钥 |
-| `NEXTAUTH_URL` | `https://speakpro-livid.vercel.app` |
+| 变量名               | 说明                                  |
+| ----------------- | ----------------------------------- |
+| `DATABASE_URL`    | Neon PostgreSQL 连接字符串               |
+| `NEXTAUTH_SECRET` | 认证加密密钥                              |
+| `NEXTAUTH_URL`    | `https://speakpro-livid.vercel.app` |
