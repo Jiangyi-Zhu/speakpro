@@ -9,6 +9,7 @@ export default async function SentencesStepPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await auth();
 
   let lesson;
   try {
@@ -22,7 +23,7 @@ export default async function SentencesStepPage({
     lesson = null;
   }
 
-  if (!lesson) notFound();
+  if (!lesson || (!lesson.published && session?.user?.role !== "ADMIN")) notFound();
 
   const segments = lesson.segments.map((s) => ({
     id: s.id,
@@ -38,7 +39,6 @@ export default async function SentencesStepPage({
   let savedSegmentIds: string[] = [];
   let initialRecordings: Record<string, string> = {};
   try {
-    const session = await auth();
     if (session?.user?.id) {
       const saved = await prisma.savedSentence.findMany({
         where: { userId: session.user.id, lessonId: id },
@@ -58,7 +58,7 @@ export default async function SentencesStepPage({
       }
     }
   } catch {
-    // not logged in or DB error
+    // DB error
   }
 
   return (

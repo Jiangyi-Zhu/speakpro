@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { VideoStepClient } from "./client";
 
 export default async function VideoStepPage({
@@ -8,6 +9,7 @@ export default async function VideoStepPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await auth();
 
   let lesson;
   try {
@@ -21,7 +23,7 @@ export default async function VideoStepPage({
     lesson = null;
   }
 
-  if (!lesson) notFound();
+  if (!lesson || (!lesson.published && session?.user?.role !== "ADMIN")) notFound();
 
   return (
     <VideoStepClient

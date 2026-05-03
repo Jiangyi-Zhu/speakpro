@@ -17,26 +17,24 @@ export default async function VocabularyBookPage() {
     lessonTitle: string | null;
   }> = [];
 
-  if (session?.user?.id) {
-    try {
-      const items = await prisma.vocabularyItem.findMany({
-        where: { userId: session.user.id },
-        include: { lesson: { select: { title: true } } },
-        orderBy: { createdAt: "desc" },
-      });
+  try {
+    const items = await prisma.vocabularyItem.findMany({
+      where: { userId: session.user.id },
+      include: { lesson: { select: { title: true } } },
+      orderBy: { createdAt: "desc" },
+    });
 
-      words = items.map((item) => ({
-        id: item.id,
-        word: item.word,
-        phonetic: item.phonetic,
-        definition: item.definition,
-        example: item.example,
-        mastered: item.mastered,
-        lessonTitle: item.lesson?.title || null,
-      }));
-    } catch {
-      // DB error
-    }
+    words = items.map((item) => ({
+      id: item.id,
+      word: item.word,
+      phonetic: item.phonetic,
+      definition: item.definition,
+      example: item.example,
+      mastered: item.mastered,
+      lessonTitle: item.lesson?.title || null,
+    }));
+  } catch {
+    // DB error
   }
 
   return <VocabularyBookClient initialWords={words} />;

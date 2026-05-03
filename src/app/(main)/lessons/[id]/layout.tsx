@@ -14,23 +14,24 @@ export default async function LessonLayout({
 }) {
   const { id } = await params;
 
+  const session = await auth();
+
   let lesson;
   try {
     lesson = await prisma.lesson.findUnique({
       where: { id },
-      select: { id: true, title: true },
+      select: { id: true, title: true, published: true },
     });
   } catch {
     // DB error - fall through to notFound
   }
 
-  if (!lesson) {
+  if (!lesson || (!lesson.published && session?.user?.role !== "ADMIN")) {
     notFound();
   }
 
   let completedSteps: Record<string, boolean> = {};
   try {
-    const session = await auth();
     if (session?.user?.id) {
       const progress = await prisma.userProgress.findUnique({
         where: { userId_lessonId: { userId: session.user.id, lessonId: id } },

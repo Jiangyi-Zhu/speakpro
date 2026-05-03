@@ -9,6 +9,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "请填写邮箱和密码" }, { status: 400 });
   }
 
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return NextResponse.json({ error: "邮箱格式不正确" }, { status: 400 });
+  }
+
   if (password.length < 8) {
     return NextResponse.json({ error: "密码至少 8 个字符" }, { status: 400 });
   }

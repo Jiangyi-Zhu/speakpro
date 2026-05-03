@@ -9,6 +9,7 @@ export default async function VocabularyStepPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await auth();
 
   let lesson;
   try {
@@ -22,7 +23,7 @@ export default async function VocabularyStepPage({
     lesson = null;
   }
 
-  if (!lesson) notFound();
+  if (!lesson || (!lesson.published && session?.user?.role !== "ADMIN")) notFound();
 
   const segments = lesson.segments.map((s) => ({
     id: s.id,
@@ -32,7 +33,6 @@ export default async function VocabularyStepPage({
 
   let initialWords: string[] = [];
   try {
-    const session = await auth();
     if (session?.user?.id) {
       const vocabItems = await prisma.vocabularyItem.findMany({
         where: { userId: session.user.id, lessonId: id },
@@ -42,7 +42,7 @@ export default async function VocabularyStepPage({
       initialWords = vocabItems.map((v) => v.word);
     }
   } catch {
-    // not logged in
+    // DB error
   }
 
   return (

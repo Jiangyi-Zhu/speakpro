@@ -350,7 +350,7 @@ export function VideoStepClient({ lessonId, videoUrl, segments }: Props) {
           </select>
         )}
 
-        {loopMode === "times" && currentLoopN > 0 && (
+        {loopMode === "times" && currentLoopN >= 0 && (
           <span className="text-xs text-orange-600">
             第 {currentLoopN + 1}/{loopCount} 遍
           </span>
