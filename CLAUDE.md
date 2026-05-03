@@ -33,25 +33,50 @@
 - `useRef` 追踪当前录音属于哪个 segment/question
 - `useEffect` 监听 `recorder.audioBlob` 变化自动上传
 
+## 认证与权限
+- NextAuth v5 (Auth.js)，JWT 策略，role 在 jwt callback 中从 DB 读取（仅登录时）
+- 修改用户 role 后，该用户需重新登录才能生效（JWT 不会自动刷新 role）
+- 登出必须用 `signOut()` from `next-auth/react`（不能用 form POST，缺 CSRF token）
+- Header 中通过 `useSession()` 获取 session，管理员显示「管理」入口
+
 ## 安全规则
 - 所有 API 需 auth() 鉴权（dictionary 也需要）
 - Admin 操作需 `session.user.role === "ADMIN"` 检查
 - 音频上传限制 5MB
 - Progress step 只增不减（取 Math.max）
 - Lesson GET 对非 admin 过滤 published
+- /api/admin/users/[id]/role 有防止自降级保护（不能降级自己）
+
+## 管理后台 (/admin)
+- layout.tsx 做 ADMIN role 检查，非管理员重定向 /dashboard
+- Header 对管理员显示紫色「管理」入口（useSession 检测 role）
+- /admin — 仪表盘：8项指标 + 课程完成率 + 最近学习动态 + 最近注册
+- /admin/lessons — 课程管理：发布/取消/删除（actions.tsx 客户端组件）
+- /admin/users — 用户管理：角色切换（role-toggle.tsx 客户端组件）
+- API: /api/admin/users/[id]/role (PATCH) — 修改用户角色
 
 ## 目录结构
 - `src/app/(auth)/` — 登录注册页面
 - `src/app/(main)/` — 主应用页面（需认证）
 - `src/app/admin/` — 管理后台（layout 做 role 检查）
 - `src/app/api/` — API 接口
-- `src/components/layout/` — Header（含底部 tab 导航）、Footer
+- `src/app/api/admin/` — 管理后台专用 API（用户角色等）
+- `src/components/layout/` — Header（含底部 tab 导航，管理员显示管理入口）
+- `src/components/signout-button.tsx` — 客户端登出按钮（next-auth/react signOut）
 - `src/components/lesson/` — StepNav 步骤导航
 - `src/hooks/` — useAudioRecorder, useProgress, useStudyTimer
 - `src/lib/` — db, auth, auth-config, storage, utils
 - `prisma/schema.prisma` — 数据库模型
 
+## 环境配置
+- 本地 .env: DATABASE_URL="file:./dev.db"（SQLite，仅本地开发）
+- 线上环境变量存 Vercel（加密），`vercel env pull` 拉不下来值
+- Vercel 项目需 `vercel link --project speakpro` 关联
+- 管理员账号: jiangyizhu78@gmail.com (线上 ADMIN)
+- README 中的 admin@speakpro.com / demo@speakpro.com 是占位，线上不存在
+
 ## 已知待做
 - 音频存储迁移到对象存储（当前 base64 存 PostgreSQL）
 - 忘记密码/重置密码流程
 - 列表页分页
+- JWT role 自动刷新（当前修改 role 需用户重新登录）
