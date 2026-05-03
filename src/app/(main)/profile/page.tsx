@@ -9,8 +9,8 @@ import {
   Clock,
   Award,
   ChevronRight,
-  LogOut,
 } from "lucide-react";
+import { SignOutButton } from "@/components/signout-button";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
@@ -91,17 +91,7 @@ export default async function ProfilePage() {
               <p className="text-sm text-gray-500">{user.email || "未设置邮箱"}</p>
             </div>
           </div>
-          {session?.user && (
-            <form action="/api/auth/signout" method="POST">
-              <button
-                type="submit"
-                className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50"
-              >
-                <LogOut className="h-4 w-4" />
-                登出
-              </button>
-            </form>
-          )}
+          {session?.user && <SignOutButton />}
         </div>
 
         <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-100 pt-6">
