@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
-import { User, Shield, BookOpen, Clock } from "lucide-react";
+import { User, BookOpen } from "lucide-react";
+import { RoleToggle } from "./role-toggle";
 
 export default async function AdminUsersPage() {
   let users: Array<{
@@ -10,11 +11,18 @@ export default async function AdminUsersPage() {
     streakDays: number;
     totalMinutes: number;
     createdAt: Date;
-    _count: { progress: number; vocabularyItems: number };
+    _count: {
+      progress: number;
+      vocabularyItems: number;
+      recordings: number;
+      expressions: number;
+      savedSentences: number;
+    };
+    completedLessons: number;
   }> = [];
 
   try {
-    users = await prisma.user.findMany({
+    const raw = await prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -24,9 +32,31 @@ export default async function AdminUsersPage() {
         streakDays: true,
         totalMinutes: true,
         createdAt: true,
-        _count: { select: { progress: true, vocabularyItems: true } },
+        _count: {
+          select: {
+            progress: true,
+            vocabularyItems: true,
+            recordings: true,
+            expressions: true,
+            savedSentences: true,
+          },
+        },
       },
     });
+
+    const completedCounts = await prisma.userProgress.groupBy({
+      by: ["userId"],
+      where: { completed: true },
+      _count: true,
+    });
+    const completedMap = new Map(
+      completedCounts.map((c) => [c.userId, c._count])
+    );
+
+    users = raw.map((u) => ({
+      ...u,
+      completedLessons: completedMap.get(u.id) || 0,
+    }));
   } catch {
     // DB error
   }
@@ -50,10 +80,18 @@ export default async function AdminUsersPage() {
               <tr>
                 <th className="px-4 py-3 font-medium text-gray-500">用户</th>
                 <th className="px-4 py-3 font-medium text-gray-500">角色</th>
-                <th className="px-4 py-3 font-medium text-gray-500">学习课程</th>
+                <th className="px-4 py-3 font-medium text-gray-500">课程</th>
+                <th className="px-4 py-3 font-medium text-gray-500">录音</th>
                 <th className="px-4 py-3 font-medium text-gray-500">词汇</th>
-                <th className="px-4 py-3 font-medium text-gray-500">连续打卡</th>
-                <th className="px-4 py-3 font-medium text-gray-500">注册时间</th>
+                <th className="px-4 py-3 font-medium text-gray-500">
+                  学习时长
+                </th>
+                <th className="px-4 py-3 font-medium text-gray-500">
+                  连续打卡
+                </th>
+                <th className="px-4 py-3 font-medium text-gray-500">
+                  注册时间
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -61,29 +99,43 @@ export default async function AdminUsersPage() {
                 <tr key={u.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div>
-                      <p className="font-medium text-gray-900">{u.name || "未命名"}</p>
+                      <p className="font-medium text-gray-900">
+                        {u.name || "未命名"}
+                      </p>
                       <p className="text-xs text-gray-500">{u.email}</p>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    {u.role === "ADMIN" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
-                        <Shield className="h-3 w-3" />
-                        Admin
-                      </span>
-                    ) : (
-                      <span className="text-gray-500">User</span>
-                    )}
+                    <RoleToggle
+                      userId={u.id}
+                      currentRole={u.role}
+                      email={u.email}
+                    />
                   </td>
                   <td className="px-4 py-3 text-gray-500">
                     <span className="flex items-center gap-1">
                       <BookOpen className="h-3.5 w-3.5" />
-                      {u._count.progress}
+                      {u.completedLessons}/{u._count.progress}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      完成/开始
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{u._count.vocabularyItems}</td>
-                  <td className="px-4 py-3 text-gray-500">{u.streakDays} 天</td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">
+                  <td className="px-4 py-3 text-gray-500">
+                    {u._count.recordings}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500">
+                    {u._count.vocabularyItems}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500">
+                    {u.totalMinutes >= 60
+                      ? `${Math.round(u.totalMinutes / 60)}h${u.totalMinutes % 60}m`
+                      : `${u.totalMinutes}m`}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500">
+                    {u.streakDays} 天
+                  </td>
+                  <td className="px-4 py-3 text-xs text-gray-400">
                     {u.createdAt.toLocaleDateString("zh-CN")}
                   </td>
                 </tr>

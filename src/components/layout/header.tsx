@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, User, Menu, X, Home, GraduationCap, Bookmark, Mic, MessageSquare } from "lucide-react";
+import { BookOpen, User, Menu, X, Home, GraduationCap, Bookmark, Mic, MessageSquare, Shield } from "lucide-react";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 
 const desktopNav = [
@@ -28,6 +29,8 @@ const mobileNav = [
 export function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
 
   const isLessonPage = pathname?.includes("/lessons/") && pathname !== "/lessons";
 
@@ -55,6 +58,20 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className={cn(
+                  "flex items-center gap-1 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors",
+                  pathname?.startsWith("/admin")
+                    ? "bg-purple-50 text-purple-700"
+                    : "text-purple-500 hover:bg-purple-50 hover:text-purple-700"
+                )}
+              >
+                <Shield className="h-3.5 w-3.5" />
+                管理
+              </Link>
+            )}
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
@@ -91,6 +108,21 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium",
+                  pathname?.startsWith("/admin")
+                    ? "bg-purple-50 text-purple-700"
+                    : "text-purple-600"
+                )}
+              >
+                <Shield className="h-4 w-4" />
+                管理后台
+              </Link>
+            )}
           </div>
         )}
       </header>
