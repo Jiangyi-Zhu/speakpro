@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-export async function POST(req: NextRequest) {
-  const { email, secret } = await req.json();
+const ONE_TIME_TOKEN = "speakpro-init-2026-05-03-xK9mQ";
 
-  if (secret !== process.env.NEXTAUTH_SECRET) {
+export async function POST(req: NextRequest) {
+  const { email, token } = await req.json();
+
+  if (token !== ONE_TIME_TOKEN) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
